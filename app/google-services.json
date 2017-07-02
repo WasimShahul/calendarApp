@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "398699211518",
+    "firebase_url": "https://samplefirebase-3a884.firebaseio.com",
+    "project_id": "samplefirebase-3a884",
+    "storage_bucket": "samplefirebase-3a884.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398699211518:android:a1f35e6557a2d2d4",
+        "android_client_info": {
+          "package_name": "com.wasim.samplefirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "398699211518-ha8e7kl0pjdt8kns0i0qhucou073ji5r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3VTAOWAc0t7DirMkA76FJyzUW2YQl28w"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398699211518:android:9f7d3eff21f8b4ec",
+        "android_client_info": {
+          "package_name": "com.wasim.calendarApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "398699211518-ha8e7kl0pjdt8kns0i0qhucou073ji5r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3VTAOWAc0t7DirMkA76FJyzUW2YQl28w"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

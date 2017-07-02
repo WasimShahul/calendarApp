@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/user_photo"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_action_account_circle_40"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:padding="5dp"
+        android:layout_toRightOf="@+id/user_photo">
+
+        <TextView
+            android:id="@+id/host_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            tools:text="" />
+
+        <TextView
+            android:id="@+id/event_date_time"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text=""/>
+
+        <Button
+            android:id="@+id/acceptBtn"
+            android:layout_width="142dp"
+            android:background="@drawable/acceptbtn"
+            android:layout_height="50dp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/rejectBtn"
+            android:layout_width="142dp"
+            android:layout_height="50dp"
+            android:background="@drawable/rejectbtn"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/deleteBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uninvite User"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
