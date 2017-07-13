@@ -5,42 +5,155 @@
     android:layout_height="match_parent"
     tools:context=".NewEventActivity">
 
-    <EditText
-        android:id="@+id/field_date"
+    <LinearLayout
+        android:id="@+id/date_LL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:hint="Date"
-        android:maxLines="1" />
+        android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/field_time"
+        <EditText
+            android:id="@+id/field_from_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:hint="Start Date"
+            android:maxLines="1" />
+
+        <EditText
+            android:id="@+id/field_to_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:hint="End Date"
+            android:maxLines="1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/time_LL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_below="@+id/field_date"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:hint="Time"
-        android:maxLines="1" />
+        android:layout_below="@+id/date_LL"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/field_from_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:hint="From Time"
+            android:maxLines="1" />
+
+        <EditText
+            android:id="@+id/field_to_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:hint="To Time"
+            android:maxLines="1" />
+
+        <LinearLayout
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider">
+
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/checkBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/time_LL"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:text="All Day" />
+    </LinearLayout>
 
     <MultiAutoCompleteTextView
         android:id="@+id/field_users"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/field_time"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/time_LL"
         android:hint="Add Users eg. mwasim1994@gmail.com"
         android:inputType="textMultiLine"
         android:maxLines="10"
         android:scrollHorizontally="false" />
+
+    <LinearLayout
+        android:id="@+id/event_type_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/field_users"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="It is a"
+            android:textSize="15dp" />
+
+        <Spinner
+            android:id="@+id/event_type_spinner"
+            android:layout_width="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="event"
+            android:textSize="15dp" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/field_event_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/date_LL"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_alignRight="@+id/date_LL"
+        android:layout_below="@+id/event_type_ll"
+        android:ems="10"
+        android:maxLength="300"
+        android:maxLines="4"
+        android:hint="Desciption"
+        android:inputType="textMultiLine" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_submit_event"
@@ -49,6 +162,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_navigation_check_24"/>
+        android:src="@drawable/ic_navigation_check_24" />
 
 </RelativeLayout>

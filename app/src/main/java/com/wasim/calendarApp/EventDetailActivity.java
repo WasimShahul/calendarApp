@@ -2,18 +2,24 @@ package com.wasim.calendarApp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class EventDetailActivity extends BaseActivity implements View.OnClickListener {
+public class EventDetailActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "EventDetailActivity";
 
@@ -47,7 +53,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private DatabaseReference mEventReference;
     private DatabaseReference mEventUsersReference;
     private ValueEventListener mEventListener;
-    private String mEventKey;
+    private String mEventKey, mUserId = getUid();
     private InvitedUserAdapter mAdapter;
 
     private static String CurrentEventHost;
@@ -59,13 +65,17 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private Button mInviteButton;
     private ImageView mViewMoreButton;
     private RecyclerView mUsersRecycler;
+    private Spinner event_type_spinner;
+    private EditText mDescriptionField;
 
     //User Selection
     ArrayList<String> usersEmail = new ArrayList<String>();
     ArrayList<String> selectedUsersIds = new ArrayList<String>();
     private HashMap<String, String> dataresult;
     private MultiAutoCompleteTextView mUsersField;
-
+    public List<String> event_type;
+    public ArrayList<String> event_ids;
+    public ArrayAdapter<String> dataAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,18 +97,45 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mHostView = (TextView) findViewById(R.id.event_host);
         mDateView = (TextView) findViewById(R.id.event_date);
         mTimeView = (TextView) findViewById(R.id.event_time);
+        event_type_spinner = (Spinner) findViewById(R.id.event_type_spinner);
+        event_type_spinner.setOnItemSelectedListener(this);
+        mDescriptionField = (EditText) findViewById(R.id.field_event_description);
         mUsersField = (MultiAutoCompleteTextView) findViewById(R.id.field_users_text);
         mInviteButton = (Button) findViewById(R.id.button_event_invite);
         mViewMoreButton = (ImageView) findViewById(R.id.viewmorebtn);
         InviteUsersForm = (LinearLayout) findViewById(R.id.invite_users_form);
         mUsersRecycler = (RecyclerView) findViewById(R.id.recycler_invited_users);
 
+        event_type = new ArrayList<String>();
+        event_type.add("public");
+        event_type.add("private");
+        dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, event_type);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        event_type_spinner.setAdapter(dataAdapter);
+
         mViewMoreButton.setVisibility(View.INVISIBLE);
         mInviteButton.setOnClickListener(this);
         mUsersRecycler.setLayoutManager(new LinearLayoutManager(this));
 
-        getAllUserEmail();
+        mDescriptionField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+//                FirebaseDatabase.getInstance().getReference().child("Events").child(mEventKey).child("description").setValue(mDescriptionField.getText().toString());
+//                FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).child("description").setValue(mDescriptionField.getText().toString());
+            }
+        });
+
+        getAllUserEmail();
 
     }
 
@@ -153,37 +190,48 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
                 try {
 
-                // Get Event object and use the values to update the UI
-                Event event = dataSnapshot.getValue(Event.class);
-                // [START_EXCLUDE]
-                mHostView.setText(event.host);
-
-                SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
-                String timeZone = (shared.getString(Constant.timeZone, ""));
-                DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
-                String startDateString = event.date + " " + event.time;
-                DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                df.setTimeZone(TimeZone.getTimeZone("UST"));
-                String dateVal = null;
+                    // Get Event object and use the values to update the UI
+                    Event event = dataSnapshot.getValue(Event.class);
+                    // [START_EXCLUDE]
+                    mHostView.setText(event.host);
+                    mDescriptionField.setText(event.description);
+                    event_type_spinner.setSelection(dataAdapter.getPosition(event.type));
+                    SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
+                    String timeZone = (shared.getString(Constant.timeZone, ""));
+                    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+                    String startDateString = event.startDate + " " + event.fromTime;
+                    String endDateString = event.endDate + " " + event.toTime;
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    df.setTimeZone(TimeZone.getTimeZone("UST"));
+                    String dateVal = null;
+                    String endDateVal = null;
 
                     dateVal = formatter.format(df.parse(startDateString));
+                    endDateVal = formatter.format(df.parse(endDateString));
 
-                Log.e("EventViewHolder 2", dateVal);
-                String[] splited = dateVal.split("\\s+");
-                String date = splited[0];
-                String time = splited[1];
+                    Log.e("EventViewHolder 2", dateVal);
+                    String[] splited = dateVal.split("\\s+");
+                    String[] splited1 = endDateVal.split("\\s+");
+                    String sdate = splited[0];
+                    String stime = splited[1];
+                    String edate = splited1[0];
+                    String etime = splited1[1];
 
-                mDateView.setText("On: "+date);
-                mTimeView.setText(time+" Hrs");
-                CurrentEventHost = event.uid;
+                    mDateView.setText(stime+ " - "+etime+ " Hrs");
+                    mTimeView.setText(sdate);
+                    CurrentEventHost = event.uid;
 
-                if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)){
-                    InviteUsersForm.setVisibility(View.VISIBLE);
-                } else{
-                    InviteUsersForm.setVisibility(View.GONE);
-                }
-                // [END_EXCLUDE]
+                    if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
+                        event_type_spinner.setEnabled(true);
+                        mDescriptionField.setEnabled(false);
+                        InviteUsersForm.setVisibility(View.VISIBLE);
+                    } else {
+                        event_type_spinner.setEnabled(false);
+                        mDescriptionField.setEnabled(false);
+                        InviteUsersForm.setVisibility(View.GONE);
+                    }
+                    // [END_EXCLUDE]
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -205,7 +253,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         // Keep copy of event listener so we can remove it when app stops
         mEventListener = eventListener;
 
-        mAdapter = new InvitedUserAdapter(this, mEventUsersReference);
+        mAdapter = new InvitedUserAdapter(this, mEventKey, mEventReference, mEventUsersReference);
         mUsersRecycler.setAdapter(mAdapter);
     }
 
@@ -251,6 +299,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                             InvitedUser invitedUser = new InvitedUser(id, getEmailFromId(id), "pending");
                             InvitedUserReference.child(id).setValue(invitedUser);
                         }
+
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
                         }
@@ -259,7 +308,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     }
 
     private String getEmailFromId(String Id) {
-        String result="";
+        String result = "";
         for (Map.Entry entry : dataresult.entrySet()) {
             if (Id.equals(entry.getValue())) {
                 result = String.valueOf(entry.getKey());
@@ -274,6 +323,18 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         String result = dataresult.get(email);
         Log.e("NewEventActivity:id", email);
         return result;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+     FirebaseDatabase.getInstance().getReference().child("Events").child(mEventKey).child("type").setValue(dataAdapter.getItem(position));
+     FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).child("type").setValue(dataAdapter.getItem(position));
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     private static class InvitedUserViewHolder extends RecyclerView.ViewHolder {
@@ -299,15 +360,18 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
         private Context mContext;
         private DatabaseReference mDatabaseReference;
+        private DatabaseReference mEventReference;
         private ChildEventListener mChildEventListener;
+        private String event_key;
 
         private List<String> mInvitedUserIds = new ArrayList<>();
         private List<InvitedUser> mInvitedUser = new ArrayList<>();
 
-        public InvitedUserAdapter(final Context context, DatabaseReference ref) {
+        public InvitedUserAdapter(final Context context, String event_id, DatabaseReference eventReference, DatabaseReference ref) {
             mContext = context;
             mDatabaseReference = ref;
-
+            mEventReference = eventReference;
+            event_key = event_id;
             // Create child event listener
             // [START child_event_listener_recycler]
             ChildEventListener childEventListener = new ChildEventListener() {
@@ -396,13 +460,20 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         }
 
         @Override
-        public void onBindViewHolder(InvitedUserViewHolder holder, int position) {
+        public void onBindViewHolder(final InvitedUserViewHolder holder, int position) {
             final InvitedUser invitedUser = mInvitedUser.get(position);
             holder.hostTxtView.setText(invitedUser.email);
-            holder.dateTimeTxtView.setText("Current status: "+invitedUser.status);
-            if(invitedUser.uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-                    holder.acceptBtn.setVisibility(View.VISIBLE);
-                    holder.rejectBtn.setVisibility(View.VISIBLE);
+            holder.dateTimeTxtView.setText("Current status: " + invitedUser.status);
+            if(invitedUser.status.equals("Accepted")){
+                holder.dateTimeTxtView.setTextColor(Color.GREEN);
+            } else if(invitedUser.status.equals("pending")){
+                holder.dateTimeTxtView.setTextColor(Color.parseColor("#FFA000"));
+            } else if(invitedUser.status.equals("Rejected")){
+                holder.dateTimeTxtView.setTextColor(Color.RED);
+            }
+            if (invitedUser.uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                holder.acceptBtn.setVisibility(View.VISIBLE);
+                holder.rejectBtn.setVisibility(View.VISIBLE);
             }
 
             holder.acceptBtn.setOnClickListener(new View.OnClickListener() {
@@ -418,11 +489,11 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     mDatabaseReference.child(invitedUser.uid).child("status").setValue("Rejected");
                 }
             });
-            if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)){
+            if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
                 holder.deleteBtn.setVisibility(View.VISIBLE);
-                Log.e(TAG,"Success");
-            } else{
-                Log.e(TAG,"Not success");
+                Log.e(TAG, "Success");
+            } else {
+                Log.e(TAG, "Not success");
                 holder.deleteBtn.setVisibility(View.GONE);
             }
             holder.deleteBtn.setOnClickListener(new View.OnClickListener() {

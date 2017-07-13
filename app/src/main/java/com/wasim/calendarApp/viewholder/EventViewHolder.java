@@ -31,17 +31,22 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
 
             DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
-            String startDateString = event.date + " " + event.time;
+            String startDateString = event.startDate + " " + event.fromTime;
+            String endDateString = event.endDate + " " + event.toTime;
             DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             df.setTimeZone(TimeZone.getTimeZone("UST"));
             String dateVal = formatter.format(df.parse(startDateString));
+            String endDateVal = formatter.format(df.parse(endDateString));
             String[] splited = dateVal.split("\\s+");
-            String date = splited[0];
-            String time = splited[1];
+            String[] splited1 = endDateVal.split("\\s+");
+            String sdate = splited[0];
+            String stime = splited[1];
+            String edate = splited1[0];
+            String etime = splited1[1];
 
-            dateTxtView.setText("On: "+date);
+            dateTxtView.setText(stime+ " - "+etime+ " Hrs");
             authorView.setText(event.host);
-            timeTxtView.setText(time+" Hrs");
+            timeTxtView.setText(sdate);
         } catch (ParseException e) {
             e.printStackTrace();
         }

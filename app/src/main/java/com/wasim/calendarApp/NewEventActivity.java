@@ -3,15 +3,24 @@ package com.wasim.calendarApp;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -24,6 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.wasim.calendarApp.models.Event;
 import com.wasim.calendarApp.models.InvitedUser;
 import com.wasim.calendarApp.models.User;
+import com.wasim.calendarApp.utils.Constant;
+import com.wasim.calendarApp.utils.DateUtils;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -32,32 +43,33 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class NewEventActivity extends BaseActivity {
+public class NewEventActivity extends BaseActivity implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "NewEventActivity";
     private static final String REQUIRED = "Required";
+    private static final String Invalid = "Time is less than from time";
 
-    // [START declare_database_ref]
+    private static String uname, sdate, edate, ftime, ttime;
     private DatabaseReference mDatabase;
-    // [END declare_database_ref]
+    final Context context = this;
+    public static ArrayList<String> allCollidingEvents = new ArrayList<String>();
     ArrayList<String> usersEmail = new ArrayList<String>();
     ArrayList<String> selectedUsersIds = new ArrayList<String>();
     private HashMap<String, String> dataresult;
 
-    private Calendar calendar;
     private int year, month, day;
     private int hour, min;
-    private boolean is24HourFormat = true;
 
-    private EditText mDateField, mTimeField;
+    private EditText mStartDateField, mEndDateField, mFromTimeField, mToTimeField, mDescriptionField;
     private MultiAutoCompleteTextView mUsersField;
     private FloatingActionButton mSubmitButton;
-
+    private static String event_type_selected;
 
 
     @Override
@@ -65,40 +77,82 @@ public class NewEventActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_event);
 
-        // [START initialize_database_ref]
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        // [END initialize_database_ref]
 
-        mDateField = (EditText) findViewById(R.id.field_date);
-        mTimeField = (EditText) findViewById(R.id.field_time);
+        mStartDateField = (EditText) findViewById(R.id.field_from_date);
+        mEndDateField = (EditText) findViewById(R.id.field_to_date);
+        mFromTimeField = (EditText) findViewById(R.id.field_from_time);
+        mToTimeField = (EditText) findViewById(R.id.field_to_time);
+        mDescriptionField = (EditText) findViewById(R.id.field_event_description);
         mUsersField = (MultiAutoCompleteTextView) findViewById(R.id.field_users);
+        CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
+        Spinner event_type_spinner = (Spinner) findViewById(R.id.event_type_spinner);
+        event_type_spinner.setOnItemSelectedListener(this);
         mSubmitButton = (FloatingActionButton) findViewById(R.id.fab_submit_event);
 
+        List<String> event_type = new ArrayList<String>();
+        event_type.add("public");
+        event_type.add("private");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, event_type);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        event_type_spinner.setAdapter(dataAdapter);
+
         //Calender
-        calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
         hour = calendar.get(Calendar.HOUR_OF_DAY);
         min = calendar.get(Calendar.MINUTE);
         setDate(year, month + 1, day);
-        setTime(hour, min);
+        setEnddDate(year, month + 1, day);
+        setFromTime(hour, min);
+        setToTime(hour, min);
 
         getAllUserEmail();
 
-        mDateField.setFocusable(false);
-        mDateField.setOnClickListener(new View.OnClickListener() {
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mFromTimeField.setText("00:00");
+                    mToTimeField.setText("23:59");
+                    mFromTimeField.setEnabled(false);
+                    mToTimeField.setEnabled(false);
+                } else {
+                    mFromTimeField.setEnabled(true);
+                    mToTimeField.setEnabled(true);
+                }
+            }
+        });
+
+        mStartDateField.setFocusable(false);
+        mStartDateField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setDate(v);
             }
         });
-
-        mTimeField.setFocusable(false);
-        mTimeField.setOnClickListener(new View.OnClickListener() {
+        mEndDateField.setFocusable(false);
+        mEndDateField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setTime(v);
+                setEndDate(v);
+            }
+        });
+
+        mFromTimeField.setFocusable(false);
+        mFromTimeField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setFTime(v);
+            }
+        });
+        mToTimeField.setFocusable(false);
+        mToTimeField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTTime(v);
             }
         });
 
@@ -116,8 +170,18 @@ public class NewEventActivity extends BaseActivity {
     }
 
     @SuppressWarnings("deprecation")
-    public void setTime(View view) {
+    public void setEndDate(View view) {
+        showDialog(1000);
+    }
+
+    @SuppressWarnings("deprecation")
+    public void setFTime(View view) {
         showDialog(1);
+    }
+
+    @SuppressWarnings("deprecation")
+    public void setTTime(View view) {
+        showDialog(2);
     }
 
     @Override
@@ -125,17 +189,26 @@ public class NewEventActivity extends BaseActivity {
         // TODO Auto-generated method stub
         if (id == 999) {
             return new DatePickerDialog(this,
-                    myDateListener, year, month, day);
+                    myStartDateListener, year, month, day);
         }
+        if (id == 1000) {
+            return new DatePickerDialog(this,
+                    myEndDateListener, year, month, day);
+        }
+        boolean is24HourFormat = true;
         if (id == 1) {
             return new TimePickerDialog(this,
-                    myTimeListener, hour, min, is24HourFormat);
+                    myFromTimeListener, hour, min, is24HourFormat);
+        }
+        if (id == 2) {
+            return new TimePickerDialog(this,
+                    myToTimeListener, hour, min, is24HourFormat);
         }
         return null;
     }
 
     private String getEmailFromId(String Id) {
-        String result="";
+        String result = "";
         for (Map.Entry entry : dataresult.entrySet()) {
             if (Id.equals(entry.getValue())) {
                 result = String.valueOf(entry.getKey());
@@ -152,19 +225,26 @@ public class NewEventActivity extends BaseActivity {
         return result;
     }
 
-    private TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
+    private TimePickerDialog.OnTimeSetListener myFromTimeListener = new TimePickerDialog.OnTimeSetListener() {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            setTime(hourOfDay, minute);
+            setFromTime(hourOfDay, minute);
+        }
+    };
+    private TimePickerDialog.OnTimeSetListener myToTimeListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            DecimalFormat mFormat = new DecimalFormat("00");
+            mToTimeField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(hourOfDay))).append(":")
+                    .append(mFormat.format(Double.valueOf(minute))));
         }
     };
 
-    private DatePickerDialog.OnDateSetListener myDateListener = new
+    private DatePickerDialog.OnDateSetListener myStartDateListener = new
             DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker arg0,
                                       int arg1, int arg2, int arg3) {
-                    // TODO Auto-generated method stub
                     // arg1 = year
                     // arg2 = month
                     // arg3 = day
@@ -172,16 +252,44 @@ public class NewEventActivity extends BaseActivity {
                 }
             };
 
+    private DatePickerDialog.OnDateSetListener myEndDateListener = new
+            DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker arg0,
+                                      int arg1, int arg2, int arg3) {
+                    DecimalFormat mFormat = new DecimalFormat("00");
+                    mEndDateField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(arg3))).append("/")
+                            .append(mFormat.format(Double.valueOf(arg2 + 1))).append("/").append(mFormat.format(Double.valueOf(arg1))));
+                }
+            };
+
     private void setDate(int year, int month, int day) {
         DecimalFormat mFormat = new DecimalFormat("00");
-        mDateField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(day))).append("/")
+        mStartDateField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(day))).append("/")
                 .append(mFormat.format(Double.valueOf(month))).append("/").append(mFormat.format(Double.valueOf(year))));
     }
 
-    private void setTime(int hour, int min) {
+    private void setEnddDate(int year, int month, int day) {
         DecimalFormat mFormat = new DecimalFormat("00");
-        mTimeField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(hour))).append(":")
+        mEndDateField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(day))).append("/")
+                .append(mFormat.format(Double.valueOf(month))).append("/").append(mFormat.format(Double.valueOf(year))));
+    }
+
+    private void setFromTime(int hour, int min) {
+        DecimalFormat mFormat = new DecimalFormat("00");
+        mFromTimeField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(hour))).append(":")
                 .append(mFormat.format(Double.valueOf(min))));
+    }
+
+    private void setToTime(int hour, int min) {
+        Calendar cal = Calendar.getInstance(); // creates calendar
+        cal.setTime(new Date()); // sets calendar time/date
+        cal.add(Calendar.HOUR_OF_DAY, 1); // adds one hour
+
+        Log.e(TAG, cal.getTime() + "");
+        DecimalFormat mFormat = new DecimalFormat("00");
+        mToTimeField.setText(new StringBuilder().append(mFormat.format(Double.valueOf(cal.getTime().getHours()))).append(":")
+                .append(mFormat.format(Double.valueOf(cal.getTime().getMinutes()))));
     }
 
     private Map<String, String> getAllUserEmail() {
@@ -225,86 +333,102 @@ public class NewEventActivity extends BaseActivity {
 
     private void submitEvent() {
         try {
-        final String date;
-        final String time;
+            final String startDate;
+            final String endDate;
+            final String fromTime;
+            final String toTime;
 
-            DateFormat formatter= new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             formatter.setTimeZone(TimeZone.getTimeZone("UST"));
-            String startDateString = mDateField.getText().toString()+" "+mTimeField.getText().toString();
             DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-                Log.e("NewEventActivity",formatter.format(df.parse(startDateString)));
+            String startDateString = mStartDateField.getText().toString() + " " + mFromTimeField.getText().toString();
+            String endDateString = mEndDateField.getText().toString() + " " + mToTimeField.getText().toString();
 
-            String dateVal = formatter.format(df.parse(startDateString));
-            String[] splited = dateVal.split("\\s+");
 
-                date=splited[0];
-                time=splited[1];
+            String startDateVal = formatter.format(df.parse(startDateString));
+            String endDateVal = formatter.format(df.parse(endDateString));
+            String[] splited1 = startDateVal.split("\\s+");
+            String[] splited2 = endDateVal.split("\\s+");
 
-            Log.e("NewEventActivity",date);
-            Log.e("NewEventActivity",time);
-        // Date is required
-        if (TextUtils.isEmpty(date)) {
-            mDateField.setError(REQUIRED);
-            return;
-        }
+            //Default Timezone Format
+            startDate = mStartDateField.getText().toString();
+            endDate = mEndDateField.getText().toString();
+            fromTime = mFromTimeField.getText().toString();
+            toTime = mToTimeField.getText().toString();
 
-        // Time is required
-        if (TextUtils.isEmpty(time)) {
-            mTimeField.setError(REQUIRED);
-            return;
-        }
+            if (DateUtils.compareDates(startDateString, endDateString)) {
 
-        String str = mUsersField.getText().toString();
-        List<String> emailIds = Arrays.asList(str.split(","));
-
-        for (String email :
-                emailIds) {
-            email = email.toLowerCase().trim();
-            if (usersEmail.contains(email)) {
-                selectedUsersIds.add(getIdFromEmail(email));
+            } else {
+                Toast.makeText(getBaseContext(), "End Date is improper", Toast.LENGTH_LONG).show();
+                return;
             }
-        }
 
-        // Disable button so there are no multi-Events
-        setEditingEnabled(false);
-        Toast.makeText(this, "Creating Event...", Toast.LENGTH_SHORT).show();
+            // Date is required
+            if (TextUtils.isEmpty(startDate)) {
+                mStartDateField.setError(REQUIRED);
+                return;
+            }
+            if (TextUtils.isEmpty(endDate)) {
+                mEndDateField.setError(REQUIRED);
+                return;
+            }
+            // Time is required
+            if (TextUtils.isEmpty(fromTime)) {
+                mFromTimeField.setError(REQUIRED);
+                return;
+            }
+            if (TextUtils.isEmpty(toTime)) {
+                mToTimeField.setError(REQUIRED);
+                return;
+            }
 
-        // [START single_value_read]
-        final String userId = getUid();
-        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Get user value
-                        User user = dataSnapshot.getValue(User.class);
+            String str = mUsersField.getText().toString();
+            List<String> emailIds = Arrays.asList(str.split(","));
 
-                        // [START_EXCLUDE]
-                        if (user == null) {
-                            // User is null, error out
-                            Log.e(TAG, "User " + userId + " is unexpectedly null");
-                            Toast.makeText(NewEventActivity.this,
-                                    "Error: could not fetch user.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Write new Event
-                            writeNewEvent(userId, user.username, date, time, selectedUsersIds);
+            for (String email :
+                    emailIds) {
+                email = email.toLowerCase().trim();
+                if (usersEmail.contains(email)) {
+                    selectedUsersIds.add(getIdFromEmail(email));
+                }
+            }
+
+            // Disable button so there are no multi-Events
+            setEditingEnabled(false);
+
+
+            // [START single_value_read]
+            final String userId = getUid();
+            mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            // Get user value
+                            User user = dataSnapshot.getValue(User.class);
+
+                            // [START_EXCLUDE]
+                            if (user == null) {
+                                // User is null, error out
+                                Toast.makeText(NewEventActivity.this,
+                                        "Error: could not fetch user.",
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                checkIfAnyEventExists(startDate, fromTime, endDate, toTime);
+                                uname = user.username;
+
+                            }
+                            // [END_EXCLUDE]
                         }
 
-                        // Finish this Activity, back to the stream
-                        setEditingEnabled(true);
-                        finish();
-                        // [END_EXCLUDE]
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                        // [START_EXCLUDE]
-                        setEditingEnabled(true);
-                        // [END_EXCLUDE]
-                    }
-                });
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+                            // [START_EXCLUDE]
+                            setEditingEnabled(true);
+                            // [END_EXCLUDE]
+                        }
+                    });
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -312,8 +436,8 @@ public class NewEventActivity extends BaseActivity {
     }
 
     private void setEditingEnabled(boolean enabled) {
-        mDateField.setEnabled(enabled);
-        mTimeField.setEnabled(enabled);
+        mStartDateField.setEnabled(enabled);
+        mFromTimeField.setEnabled(enabled);
         if (enabled) {
             mSubmitButton.setVisibility(View.VISIBLE);
         } else {
@@ -322,38 +446,205 @@ public class NewEventActivity extends BaseActivity {
     }
 
     // [START write_fan_out]
-    private void writeNewEvent(String userId, String username, String title, String body, ArrayList<String> selectedUsersIds) {
+    private void writeNewEvent(String userId, String username, String startDate, String endDate, String fromTime, String toTime, String type, String description, ArrayList<String> selectedUsersIds) {
 
-        final String key = mDatabase.child("Events").push().getKey();
-        final DatabaseReference InvitedUserReference = FirebaseDatabase.getInstance().getReference().child("Events").child(key).child("users");
+        try{
+            DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            formatter.setTimeZone(TimeZone.getTimeZone("UST"));
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-        Event event = new Event(userId, username, title, body);
-        Map<String, Object> eventValues = event.toMap();
+            String startDateString = startDate + " " + fromTime;
+            String endDateString = endDate + " " + toTime;
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/Events/" + key, eventValues);
-        childUpdates.put("/user-events/" + userId + "/" + key, eventValues);
 
-        mDatabase.updateChildren(childUpdates);
+            String startDateVal = formatter.format(df.parse(startDateString));
+            String endDateVal = formatter.format(df.parse(endDateString));
+            String[] splited1 = startDateVal.split("\\s+");
+            String[] splited2 = endDateVal.split("\\s+");
 
-        for (final String id :
-                selectedUsersIds) {
+            //UST Format
+            startDate = splited1[0];
+            endDate = splited2[0];
+            fromTime = splited1[1];
+            toTime = splited2[1];
 
-            InvitedUserReference.child(id)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            // Get user information
-                            InvitedUser invitedUser = new InvitedUser(id, getEmailFromId(id), "pending");
-                            InvitedUserReference.child(id).setValue(invitedUser);
-                        }
+            final String key = mDatabase.child("Events").push().getKey();
+            final DatabaseReference InvitedUserReference = FirebaseDatabase.getInstance().getReference().child("Events").child(key).child("users");
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+            Event event = new Event(userId, username, startDate, endDate, fromTime, toTime, type, description);
+            Map<String, Object> eventValues = event.toMap();
 
-                        }
-                    });
+            Map<String, Object> childUpdates = new HashMap<>();
+            childUpdates.put("/Events/" + key, eventValues);
+            childUpdates.put("/user-events/" + userId + "/" + key, eventValues);
+
+            mDatabase.updateChildren(childUpdates);
+
+            for (final String id :
+                    selectedUsersIds) {
+
+                InvitedUserReference.child(id)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                // Get user information
+                                InvitedUser invitedUser = new InvitedUser(id, getEmailFromId(id), "pending");
+                                InvitedUserReference.child(id).setValue(invitedUser);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+            }
+        } catch (Exception e){
+
         }
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        event_type_selected = parent.getItemAtPosition(position).toString();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        event_type_selected = "public";
     }
     // [END write_fan_out]
+
+    public void checkIfAnyEventExists(final String startDate, final String fromTime, final String endDate, final String toTime) {
+
+        //Default Time Zone Format
+        sdate = startDate;
+        edate = endDate;
+        ftime = fromTime;
+        ttime = toTime;
+        FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long daysInBetween = DateUtils.daysInBetween(sdate + " " + ftime, edate + " " + ttime);
+                for (long i = 0; i <= daysInBetween ; i++) {
+                    sdate = DateUtils.addDays(startDate, (int) i);
+                if (dataSnapshot.getValue() == null) {
+                    Log.e(TAG, "null");
+                    writeNewEvent(getUid(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+                    setEditingEnabled(true);
+                    finish();
+                } else {
+                    Log.e(TAG, "not null");
+                    detectCollidingEvents((Map<String, Object>) dataSnapshot.getValue(), sdate + " " + ftime, sdate + " " + ttime);
+                }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void detectCollidingEvents(Map<String, Object> users, String startDateTime, String endDateTime) {
+        Log.e(TAG, "Entering detectCollidingEvents...");
+        Log.e(TAG, startDateTime + " " + endDateTime);
+        allCollidingEvents.clear();
+        SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
+        String timeZone = (shared.getString(Constant.timeZone, ""));
+        Long newMinutesInBetween = DateUtils.minutesInBetween(startDateTime, endDateTime);
+        //iterate through each node
+        for (Map.Entry<String, Object> entry : users.entrySet()) {
+            try{
+
+            //Get map
+            Map singleUser = (Map) entry.getValue();
+            Log.e(TAG, "Before Conversion...");
+            Log.e(TAG, "sdat: "+ singleUser.get("startDate") + " " + singleUser.get("fromTime"));
+            Log.e(TAG, "edat: "+ singleUser.get("endDate") + " " + singleUser.get("toTime"));
+
+            DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+            String startDateString = singleUser.get("startDate") + " " + singleUser.get("fromTime");
+            String endDateString = singleUser.get("endDate") + " " + singleUser.get("toTime");
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            df.setTimeZone(TimeZone.getTimeZone("UST"));
+            String sdat = formatter.format(df.parse(startDateString));
+            String edat = formatter.format(df.parse(endDateString));
+                Long existingMinutesInBetween = DateUtils.minutesInBetween(sdat, edat);
+                Long availableMinutes = DateUtils.minutesInBetween(startDateTime, sdat);
+                Log.e(TAG, newMinutesInBetween + " newMinutesInBetween");
+                Log.e(TAG, existingMinutesInBetween + " existingMinutesInBetween");
+                Log.e(TAG, availableMinutes + " available minutes");
+                if (availableMinutes > 0) {
+                    if (availableMinutes <= newMinutesInBetween) {
+                        Log.e(TAG, "Collision occurs on" + entry.getKey());
+                        allCollidingEvents.add(entry.getKey());
+                    } else {
+                        Log.e(TAG, "Collision does not occur");
+                    }
+                } else if (availableMinutes <= 0) {
+                    if (DateUtils.parseDate(edat).after(DateUtils.parseDate(startDateTime))) {
+                        Log.e(TAG, " colloision occurs" + entry.getKey());
+                        allCollidingEvents.add(entry.getKey());
+                    } else if (DateUtils.parseDate(edat).equals(DateUtils.parseDate(startDateTime))) {
+                        Log.e(TAG, " colloision occurs" + entry.getKey());
+                        allCollidingEvents.add(entry.getKey());
+                    } else if (DateUtils.parseDate(edat).before(DateUtils.parseDate(startDateTime))) {
+                        Log.e(TAG, "No Collision");
+                    }
+                }
+
+            } catch (Exception e){
+
+            }
+        }
+        if (allCollidingEvents.isEmpty()) {
+            Toast.makeText(this, "Creating Event...", Toast.LENGTH_SHORT).show();
+            writeNewEvent(getUid(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+            // Finish this Activity, back to the stream
+            setEditingEnabled(true);
+            finish();
+        } else {
+            setEditingEnabled(true);
+            showAlert("You already have " + allCollidingEvents.size() + " event(s) on " + sdate + " during this period.");
+//            Toast.makeText(getBaseContext(), "You already have " + allCollidingEvents.size() + " event(s) during this period.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void showAlert(String Message) {
+        // custom dialog
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.alert_dialog);
+        dialog.setTitle("Event Alert");
+
+        // set the custom dialog components - text, image and button
+        TextView text = (TextView) dialog.findViewById(R.id.text);
+        text.setText(Message);
+
+        Button dialogButtonOK = (Button) dialog.findViewById(R.id.dialogButtonOK);
+        Button dialogButtonCancel = (Button) dialog.findViewById(R.id.dialogButtonCANCEL);
+        // if button is clicked, close the custom dialog
+        dialogButtonOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeNewEvent(getUid(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+                // Finish this Activity, back to the stream
+                setEditingEnabled(true);
+                finish();
+                dialog.dismiss();
+            }
+        });
+        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+
+    }
 }

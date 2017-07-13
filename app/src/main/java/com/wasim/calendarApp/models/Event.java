@@ -12,30 +12,39 @@ public class Event {
 
     public String uid;
     public String host;
-    public String date;
-    public String time;
+    public String startDate;
+    public String endDate;
+    public String fromTime;
+    public String toTime;
+    public String type;
+    public String description;
     public Event() {
         // Default constructor required for calls to DataSnapshot.getValue(Event.class)
     }
 
-    public Event(String uid, String host, String date, String time) {
+    public Event(String uid, String host, String startDate, String endDate, String fromTime,String toTime,String type,String description) {
         this.uid = uid;
         this.host = host;
-        this.date = date;
-        this.time = time;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.fromTime = fromTime;
+        this.toTime = toTime;
+        this.type = type;
+        this.description = description;
     }
 
-    // [START post_to_map]
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
         result.put("uid", uid);
         result.put("host", host);
-        result.put("date", date);
-        result.put("time", time);
+        result.put("startDate", startDate);
+        result.put("endDate", endDate);
+        result.put("fromTime", fromTime);
+        result.put("toTime", toTime);
+        result.put("type", type);
+        result.put("description", description);
         return result;
     }
-    // [END post_to_map]
 
 }
-// [END post_class]
