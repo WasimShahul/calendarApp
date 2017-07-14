@@ -8,4 +8,13 @@
     <color name="secondary_text">#727272</color>
     <color name="icons">#212121</color>
     <color name="divider">#B6B6B6</color>
+    <color name="alert_heading">#ffffff</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="element_hint_color">#474747</color>
+    <color name="bottom_ll">#000000</color>
+    <color name="bottom__element">#ffffff</color>
+    <color name="activity_title_color">#000000</color>
+    <color name="activity_title_white_color">#ffffff</color>
+    <color name="element_heading_color">#000000</color>
+    <color name="element_value_color">#474747</color>
 </resources>

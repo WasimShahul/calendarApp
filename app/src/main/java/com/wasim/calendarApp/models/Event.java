@@ -18,11 +18,13 @@ public class Event {
     public String toTime;
     public String type;
     public String description;
+    public String title;
+    public String location;
     public Event() {
         // Default constructor required for calls to DataSnapshot.getValue(Event.class)
     }
 
-    public Event(String uid, String host, String startDate, String endDate, String fromTime,String toTime,String type,String description) {
+    public Event(String uid, String title, String location, String host, String startDate, String endDate, String fromTime,String toTime,String type,String description) {
         this.uid = uid;
         this.host = host;
         this.startDate = startDate;
@@ -31,6 +33,8 @@ public class Event {
         this.toTime = toTime;
         this.type = type;
         this.description = description;
+        this.title = title;
+        this.location = location;
     }
 
     @Exclude
@@ -44,6 +48,8 @@ public class Event {
         result.put("toTime", toTime);
         result.put("type", type);
         result.put("description", description);
+        result.put("title", title);
+        result.put("location", location);
         return result;
     }
 

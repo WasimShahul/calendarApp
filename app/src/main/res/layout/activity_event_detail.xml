@@ -3,68 +3,175 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@drawable/whitebackground"
     tools:context=".EventDetailActivity">
+
 
     <include
         android:id="@+id/event_host_layout"
         layout="@layout/include_event_host"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayout"
+        android:layout_alignRight="@+id/textView"
+        android:layout_alignEnd="@+id/textView"
+        android:visibility="gone"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:id="@+id/relativeLayout">
+
+        <TextView
+            android:id="@+id/activity_event_title_behind_txtView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="@string/event"
+            android:textColor="#30ffffff"
+            android:textSize="70dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/activity_event_title_txtView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="@string/event"
+            android:textColor="@color/activity_title_white_color"
+            android:textSize="@dimen/activity_title_size"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="200dp"
         android:layout_height="2dp"
-        android:layout_marginTop="4dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/event_host_layout"
-        android:background="#dddddd"></LinearLayout>
+        android:layout_marginTop="4dp"
+        android:id="@+id/border_ll"
+        android:background="#dddddd"
+        android:orientation="horizontal"></LinearLayout>
 
     <include
         android:id="@+id/event_date_time_layout"
         layout="@layout/include_event_date_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/event_host_layout"
         android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/activity_event_time_txtView"
+        android:layout_below="@+id/border_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:shadowColor="@color/divider"
+        android:shadowDx="8"
+        android:shadowDy="8"
+        android:shadowRadius="5"
+        android:text="@string/event"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/activity_title_color"
+        android:textSize="@dimen/activity_title_size"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
     <LinearLayout
         android:layout_width="200dp"
+        android:id="@+id/border2_ll"
         android:layout_height="2dp"
-        android:layout_marginTop="2dp"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/event_date_time_layout"
-        android:background="#dddddd"></LinearLayout>
+        android:layout_below="@+id/activity_event_time_txtView"
+        android:layout_marginTop="2dp"
+        android:background="#dddddd"
+        android:orientation="horizontal"></LinearLayout>
+
+    <TextView
+        android:id="@+id/field_event_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/date_LL"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/date_LL"
+        android:layout_below="@+id/border2_ll"
+        android:layout_marginBottom="5dp"
+        android:textColor="@color/activity_title_white_color"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="25dp"
+        android:editable="false"
+        android:textSize="22dp"
+        android:ems="10"
+        android:hint="Title"
+        android:background="@null"
+        android:gravity="center"
+        android:inputType="textMultiLine"
+        android:maxLength="300"
+        android:maxLines="4" />
+
+    <TextView
+        android:id="@+id/field_event_description"
+        android:layout_width="match_parent"
+        android:textSize="15dp"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/date_LL"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/date_LL"
+        android:layout_below="@+id/field_event_title"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="16dp"
+        android:background="@null"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="Desciption"
+        android:inputType="textMultiLine"
+        android:maxLength="300"
+        android:maxLines="4" />
 
     <TextView
         android:id="@+id/textView"
-        android:layout_marginTop="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/invite_users_form"
-        android:text="Users Invited"
+        android:layout_marginTop="5dp"
+        android:text="See who else is invited..."
         android:textSize="15dp" />
 
     <LinearLayout
+        android:id="@+id/event_type_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/event_date_time_layout"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="16dp"
-        android:id="@+id/event_type_layout"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
-        android:layout_below="@+id/event_date_time_layout"
         android:orientation="vertical">
 
         <LinearLayout
@@ -98,32 +205,13 @@
 
         </LinearLayout>
 
-        <EditText
-            android:id="@+id/field_event_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/date_LL"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignRight="@+id/date_LL"
-            android:layout_below="@+id/event_type_ll"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
-            android:ems="10"
-            android:hint="Desciption"
-            android:inputType="textMultiLine"
-            android:maxLength="300"
-            android:maxLines="4" />
-
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/invite_users_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/event_type_layout"
+        android:layout_below="@+id/field_event_description"
         android:layout_marginTop="20dp"
         android:orientation="horizontal"
         android:weightSum="1.0">
@@ -148,10 +236,10 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_invited_users"
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/textView"
+        android:layout_marginTop="10dp"
         tools:listitem="@layout/item_invited_users" />
 
 </RelativeLayout>

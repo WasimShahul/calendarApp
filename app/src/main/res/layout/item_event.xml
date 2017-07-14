@@ -3,39 +3,110 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#ffffff"
-    android:layout_margin="5dp">
+    android:layout_margin="5dp"
+    android:background="#ffffff">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <include
-            android:id="@+id/event_host_layout"
-            layout="@layout/include_event_host"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true" />
+        android:background="#ffffff"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="200dp"
-            android:layout_height="1dp"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/event_host_layout"
-            android:layout_marginTop="3dp"
-            android:background="#dddddd"></LinearLayout>
-
-        <include
-            layout="@layout/include_event_date_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/event_host_layout"
-            android:layout_marginTop="5dp" />
+            android:orientation="horizontal">
 
-    </RelativeLayout>
+            <LinearLayout
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/avatar"
+                android:minHeight="50dp"
+                android:orientation="vertical" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/event_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/element_value_color" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginTop="5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/host_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hosted by "
+                        android:textColor="#aaaaaa" />
+
+                    <TextView
+                        android:id="@+id/event_host"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/element_value_color" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/event_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:textColor="@color/element_value_color" />
+
+            <TextView
+                android:id="@+id/event_time"
+                android:layout_marginLeft="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/element_value_color" />
+
+
+        </LinearLayout>
+
+        <!--<include-->
+        <!--android:id="@+id/event_host_layout"-->
+        <!--layout="@layout/include_event_host"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:visibility="gone" />-->
+
+        <!--<include-->
+        <!--layout="@layout/include_event_date_time"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:layout_below="@+id/event_host_layout"-->
+        <!--android:layout_marginTop="5dp"-->
+        <!--android:visibility="gone" />-->
+
+    </LinearLayout>
 
 </android.support.v7.widget.CardView>

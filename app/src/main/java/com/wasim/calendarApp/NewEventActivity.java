@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.text.TextUtils;
@@ -35,6 +36,7 @@ import com.wasim.calendarApp.models.InvitedUser;
 import com.wasim.calendarApp.models.User;
 import com.wasim.calendarApp.utils.Constant;
 import com.wasim.calendarApp.utils.DateUtils;
+import com.wasim.calendarApp.utils.FontFaces;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -66,10 +68,15 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
     private int year, month, day;
     private int hour, min;
 
-    private EditText mStartDateField, mEndDateField, mFromTimeField, mToTimeField, mDescriptionField;
+    private EditText mStartDateField, mEndDateField, field_title, mFromTimeField, mToTimeField, mDescriptionField, field_event_location;
     private MultiAutoCompleteTextView mUsersField;
-    private FloatingActionButton mSubmitButton;
+    private TextView mSubmitButton;
+//    private FloatingActionButton mSubmitButton;
+    private CheckBox checkBox;
+    private Spinner event_type_spinner;
     private static String event_type_selected;
+
+    private TextView activity_title_txtView, location_heading_txtView, title_txtView, app_name_txtView, description_heading_txtView, from_txtView, to_txtView, start_time_txtView, end_time_txtView, add_users_txtView, event_type_begin_txtView, event_type_end_txtView;
 
 
     @Override
@@ -84,11 +91,52 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         mFromTimeField = (EditText) findViewById(R.id.field_from_time);
         mToTimeField = (EditText) findViewById(R.id.field_to_time);
         mDescriptionField = (EditText) findViewById(R.id.field_event_description);
+        field_event_location = (EditText) findViewById(R.id.field_event_location);
+        field_title = (EditText) findViewById(R.id.field_title);
+        activity_title_txtView = (TextView) findViewById(R.id.activity_title_txtView);
+        app_name_txtView = (TextView) findViewById(R.id.app_name_txtView);
+        from_txtView = (TextView) findViewById(R.id.from_txtView);
+        to_txtView = (TextView) findViewById(R.id.to_txtView);
+        start_time_txtView = (TextView) findViewById(R.id.start_time_txtView);
+        end_time_txtView = (TextView) findViewById(R.id.end_time_txtView);
+        add_users_txtView = (TextView) findViewById(R.id.add_users_txtView);
+        title_txtView = (TextView) findViewById(R.id.title_txtView);
+        description_heading_txtView = (TextView) findViewById(R.id.description_heading_txtView);
+        event_type_begin_txtView = (TextView) findViewById(R.id.event_type_begin_txtView);
+        event_type_end_txtView = (TextView) findViewById(R.id.event_type_end_txtView);
+        location_heading_txtView = (TextView) findViewById(R.id.location_heading_txtView);
         mUsersField = (MultiAutoCompleteTextView) findViewById(R.id.field_users);
-        CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
-        Spinner event_type_spinner = (Spinner) findViewById(R.id.event_type_spinner);
+        checkBox = (CheckBox) findViewById(R.id.checkBox);
+        mSubmitButton = (TextView) findViewById(R.id.fab_submit_event);
+        event_type_spinner = (Spinner) findViewById(R.id.event_type_spinner);
+
+
+        activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
+        app_name_txtView.setTypeface(FontFaces.montserratRegular(this));
+        from_txtView.setTypeface(FontFaces.montserratRegular(this));
+        to_txtView.setTypeface(FontFaces.montserratRegular(this));
+        start_time_txtView.setTypeface(FontFaces.montserratRegular(this));
+        end_time_txtView.setTypeface(FontFaces.montserratRegular(this));
+        mUsersField.setTypeface(FontFaces.montserratRegular(this));
+        description_heading_txtView.setTypeface(FontFaces.montserratRegular(this));
+        event_type_begin_txtView.setTypeface(FontFaces.montserratRegular(this));
+        event_type_end_txtView.setTypeface(FontFaces.montserratRegular(this));
+        add_users_txtView.setTypeface(FontFaces.montserratRegular(this));
+        field_title.setTypeface(FontFaces.montserratRegular(this));
+        title_txtView.setTypeface(FontFaces.montserratRegular(this));
+        mDescriptionField.setTypeface(FontFaces.montserratRegular(this));
+        location_heading_txtView.setTypeface(FontFaces.montserratRegular(this));
+        field_event_location.setTypeface(FontFaces.montserratRegular(this));
+        checkBox.setTypeface(FontFaces.montserratRegular(this));
+        mFromTimeField.setTypeface(FontFaces.montserratBold(this));
+        mToTimeField.setTypeface(FontFaces.montserratBold(this));
+        mStartDateField.setTypeface(FontFaces.montserratBold(this));
+        mEndDateField.setTypeface(FontFaces.montserratBold(this));
+        mSubmitButton.setTypeface(FontFaces.montserratBold(this));
+
+
         event_type_spinner.setOnItemSelectedListener(this);
-        mSubmitButton = (FloatingActionButton) findViewById(R.id.fab_submit_event);
+
 
         List<String> event_type = new ArrayList<String>();
         event_type.add("public");
@@ -446,7 +494,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
     }
 
     // [START write_fan_out]
-    private void writeNewEvent(String userId, String username, String startDate, String endDate, String fromTime, String toTime, String type, String description, ArrayList<String> selectedUsersIds) {
+    private void writeNewEvent(String userId, String title, String location, String username, String startDate, String endDate, String fromTime, String toTime, String type, String description, ArrayList<String> selectedUsersIds) {
 
         try{
             DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -471,7 +519,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
             final String key = mDatabase.child("Events").push().getKey();
             final DatabaseReference InvitedUserReference = FirebaseDatabase.getInstance().getReference().child("Events").child(key).child("users");
 
-            Event event = new Event(userId, username, startDate, endDate, fromTime, toTime, type, description);
+            Event event = new Event(userId, title, location, username, startDate, endDate, fromTime, toTime, type, description);
             Map<String, Object> eventValues = event.toMap();
 
             Map<String, Object> childUpdates = new HashMap<>();
@@ -530,7 +578,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
                     sdate = DateUtils.addDays(startDate, (int) i);
                 if (dataSnapshot.getValue() == null) {
                     Log.e(TAG, "null");
-                    writeNewEvent(getUid(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+                    writeNewEvent(getUid(), uname, field_title.getText().toString(), field_event_location.getText().toString(), sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
                     setEditingEnabled(true);
                     finish();
                 } else {
@@ -603,7 +651,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         }
         if (allCollidingEvents.isEmpty()) {
             Toast.makeText(this, "Creating Event...", Toast.LENGTH_SHORT).show();
-            writeNewEvent(getUid(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+            writeNewEvent(getUid(), field_title.getText().toString(), field_event_location.getText().toString(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
             // Finish this Activity, back to the stream
             setEditingEnabled(true);
             finish();
@@ -630,7 +678,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         dialogButtonOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                writeNewEvent(getUid(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+                writeNewEvent(getUid(), field_title.getText().toString(), field_event_location.getText().toString(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
                 // Finish this Activity, back to the stream
                 setEditingEnabled(true);
                 finish();

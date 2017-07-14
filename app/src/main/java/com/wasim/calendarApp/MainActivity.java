@@ -25,10 +25,12 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.wasim.calendarApp.fragment.MyEventsFragment;
 import com.wasim.calendarApp.fragment.AllEventsFragment;
+import com.wasim.calendarApp.utils.FontFaces;
 
 public class  MainActivity extends BaseActivity {
 
@@ -36,12 +38,17 @@ public class  MainActivity extends BaseActivity {
 
     private FragmentPagerAdapter mPagerAdapter;
     private ViewPager mViewPager;
+    private TextView activity_title_txtView, fab_new_event;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        activity_title_txtView = (TextView) findViewById(R.id.activity_title_txtView);
+        fab_new_event = (TextView) findViewById(R.id.fab_new_event);
+        activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
+        fab_new_event.setTypeface(FontFaces.montserratBold(this));
         // Create the adapter that will return a fragment for each section
         mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             private final Fragment[] mFragments = new Fragment[] {

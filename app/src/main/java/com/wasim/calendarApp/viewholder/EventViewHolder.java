@@ -1,11 +1,14 @@
 package com.wasim.calendarApp.viewholder;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import com.wasim.calendarApp.R;
 import com.wasim.calendarApp.models.Event;
+import com.wasim.calendarApp.utils.FontFaces;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +19,8 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
     public TextView dateTxtView;
     public TextView authorView;
     public TextView timeTxtView;
+    public TextView hostTxtView;
+    public TextView titleTxtView;
 
     public EventViewHolder(View itemView) {
         super(itemView);
@@ -23,10 +28,12 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
         dateTxtView = (TextView) itemView.findViewById(R.id.event_date);
         authorView = (TextView) itemView.findViewById(R.id.event_host);
         timeTxtView = (TextView) itemView.findViewById(R.id.event_time);
+        hostTxtView = (TextView) itemView.findViewById(R.id.host_title);
+        titleTxtView = (TextView) itemView.findViewById(R.id.event_title);
 
     }
 
-    public void bindToEvent(String timeZone, Event event, View.OnClickListener starClickListener) {
+    public void bindToEvent(Context context, String timeZone, Event event, View.OnClickListener starClickListener) {
         try {
 
             DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -44,9 +51,16 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
             String edate = splited1[0];
             String etime = splited1[1];
 
-            dateTxtView.setText(stime+ " - "+etime+ " Hrs");
+            dateTxtView.setTypeface(FontFaces.montserratRegular(context));
+            authorView.setTypeface(FontFaces.montserratBold(context));
+            timeTxtView.setTypeface(FontFaces.montserratRegular(context));
+            dateTxtView.setTypeface(FontFaces.montserratRegular(context));
+            titleTxtView.setTypeface(FontFaces.montserratBold(context));
+
+            timeTxtView.setText(stime+ " - "+etime+ " Hrs");
             authorView.setText(event.host);
-            timeTxtView.setText(sdate);
+            dateTxtView.setText(sdate);
+            titleTxtView.setText(event.title);
         } catch (ParseException e) {
             e.printStackTrace();
         }

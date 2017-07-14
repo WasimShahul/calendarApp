@@ -93,7 +93,7 @@ public abstract class EventListFragment extends Fragment {
                 String timeZone = (shared.getString(Constant.timeZone, ""));
 
                 // Bind Event to ViewHolder, setting OnClickListener for the star button
-                viewHolder.bindToEvent(timeZone, model, new View.OnClickListener() {
+                viewHolder.bindToEvent(getContext(), timeZone, model, new View.OnClickListener() {
                     @Override
                     public void onClick(View starView) {
                     }

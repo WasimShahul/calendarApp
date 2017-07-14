@@ -8,7 +8,7 @@
         android:id="@+id/text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="#474747"
+        android:textColor="@color/alert_heading"
         android:textSize="17sp" />
 
     <LinearLayout

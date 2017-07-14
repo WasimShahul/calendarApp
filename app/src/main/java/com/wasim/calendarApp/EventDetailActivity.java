@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.wasim.calendarApp.models.Event;
 import com.wasim.calendarApp.models.InvitedUser;
 import com.wasim.calendarApp.utils.Constant;
+import com.wasim.calendarApp.utils.FontFaces;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -53,7 +54,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private DatabaseReference mEventReference;
     private DatabaseReference mEventUsersReference;
     private ValueEventListener mEventListener;
-    private String mEventKey, mUserId = getUid();
+    private String mEventKey;
     private InvitedUserAdapter mAdapter;
 
     private static String CurrentEventHost;
@@ -61,12 +62,11 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private TextView mHostView;
     private LinearLayout InviteUsersForm;
     private TextView mDateView;
-    private TextView mTimeView;
+    private TextView mTimeView,mDescriptionField, textView, field_event_title, activity_event_title_behind_txtView, activity_event_title_txtView, activity_event_time_txtView;
     private Button mInviteButton;
     private ImageView mViewMoreButton;
     private RecyclerView mUsersRecycler;
     private Spinner event_type_spinner;
-    private EditText mDescriptionField;
 
     //User Selection
     ArrayList<String> usersEmail = new ArrayList<String>();
@@ -74,7 +74,6 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private HashMap<String, String> dataresult;
     private MultiAutoCompleteTextView mUsersField;
     public List<String> event_type;
-    public ArrayList<String> event_ids;
     public ArrayAdapter<String> dataAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,15 +96,29 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mHostView = (TextView) findViewById(R.id.event_host);
         mDateView = (TextView) findViewById(R.id.event_date);
         mTimeView = (TextView) findViewById(R.id.event_time);
+        textView = (TextView) findViewById(R.id.textView);
+        field_event_title = (TextView) findViewById(R.id.field_event_title);
+        activity_event_time_txtView = (TextView) findViewById(R.id.activity_event_time_txtView);
+        activity_event_title_txtView = (TextView) findViewById(R.id.activity_event_title_txtView);
+        activity_event_title_behind_txtView = (TextView) findViewById(R.id.activity_event_title_behind_txtView);
         event_type_spinner = (Spinner) findViewById(R.id.event_type_spinner);
         event_type_spinner.setOnItemSelectedListener(this);
-        mDescriptionField = (EditText) findViewById(R.id.field_event_description);
+        mDescriptionField = (TextView) findViewById(R.id.field_event_description);
         mUsersField = (MultiAutoCompleteTextView) findViewById(R.id.field_users_text);
         mInviteButton = (Button) findViewById(R.id.button_event_invite);
         mViewMoreButton = (ImageView) findViewById(R.id.viewmorebtn);
         InviteUsersForm = (LinearLayout) findViewById(R.id.invite_users_form);
         mUsersRecycler = (RecyclerView) findViewById(R.id.recycler_invited_users);
 
+        activity_event_title_behind_txtView.setTypeface(FontFaces.montserratBold(this));
+        activity_event_title_txtView.setTypeface(FontFaces.montserratRegular(this));
+        mDescriptionField.setTypeface(FontFaces.montserratRegular(this));
+        mUsersField.setTypeface(FontFaces.montserratRegular(this));
+        textView.setTypeface(FontFaces.montserratRegular(this));
+        mDateView.setTypeface(FontFaces.montserratBold(this));
+        mInviteButton.setTypeface(FontFaces.montserratBold(this));
+        field_event_title.setTypeface(FontFaces.montserratBold(this));
+        activity_event_time_txtView.setTypeface(FontFaces.montserratBold(this));
         event_type = new ArrayList<String>();
         event_type.add("public");
         event_type.add("private");
@@ -195,6 +208,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     // [START_EXCLUDE]
                     mHostView.setText(event.host);
                     mDescriptionField.setText(event.description);
+                    field_event_title.setText(event.title);
                     event_type_spinner.setSelection(dataAdapter.getPosition(event.type));
                     SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
                     String timeZone = (shared.getString(Constant.timeZone, ""));
@@ -218,17 +232,20 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     String edate = splited1[0];
                     String etime = splited1[1];
 
-                    mDateView.setText(stime+ " - "+etime+ " Hrs");
-                    mTimeView.setText(sdate);
+//                    activity_event_title_behind_txtView.setText(sdate);
+                    activity_event_title_txtView.setText(sdate);
+                    activity_event_time_txtView.setText(stime+ " - "+etime+ " Hrs");
+//                    mTimeView.setText(sdate);
                     CurrentEventHost = event.uid;
 
                     if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
-                        event_type_spinner.setEnabled(true);
-                        mDescriptionField.setEnabled(false);
+                        event_type_spinner.setEnabled(false);
+//                        field_event_title.setEnabled(false);
+//                        mDescriptionField.setEnabled(false);
                         InviteUsersForm.setVisibility(View.VISIBLE);
                     } else {
                         event_type_spinner.setEnabled(false);
-                        mDescriptionField.setEnabled(false);
+//                        mDescriptionField.setEnabled(false);
                         InviteUsersForm.setVisibility(View.GONE);
                     }
                     // [END_EXCLUDE]

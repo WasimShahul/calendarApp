@@ -1,17 +1,13 @@
 package com.wasim.calendarApp.utils;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 
+import android.util.Log;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class DateUtils {
 
@@ -122,8 +118,7 @@ public class DateUtils {
         return diffDays;
     }
 
-    public static boolean compareDates(String d1,String d2)
-    {
+    public static boolean compareDates(String d1,String d2) {
         try{
             // If you already have date objects then skip 1
 
