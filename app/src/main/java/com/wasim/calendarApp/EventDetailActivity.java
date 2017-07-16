@@ -1,5 +1,6 @@
 package com.wasim.calendarApp;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -32,8 +33,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.wasim.calendarApp.models.Event;
 import com.wasim.calendarApp.models.InvitedUser;
+import com.wasim.calendarApp.models.User;
 import com.wasim.calendarApp.utils.Constant;
+import com.wasim.calendarApp.utils.DateUtils;
 import com.wasim.calendarApp.utils.FontFaces;
+import com.wasim.calendarApp.utils.NotificationFunctions;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -50,12 +54,25 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private static final String TAG = "EventDetailActivity";
 
     public static final String EXTRA_EVENT_KEY = "event_key";
+    public static ArrayList<String> allCollidingEvents = new ArrayList<String>();
 
     private DatabaseReference mEventReference;
     private DatabaseReference mEventUsersReference;
     private ValueEventListener mEventListener;
     private String mEventKey;
     private InvitedUserAdapter mAdapter;
+
+    NotificationFunctions notificationFunctions;
+
+    private static String stardate;
+    private static String endate;
+    private static String frotime;
+    private static String totime;
+    private static String uname;
+    private static String title;
+    private static String location;
+    private static String eventtype;
+    private static String description;
 
     private static String CurrentEventHost;
 
@@ -80,6 +97,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
+        notificationFunctions = new NotificationFunctions(this);
         // Get event key from intent
         mEventKey = getIntent().getStringExtra(EXTRA_EVENT_KEY);
         if (mEventKey == null) {
@@ -206,6 +224,18 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     // Get Event object and use the values to update the UI
                     Event event = dataSnapshot.getValue(Event.class);
                     // [START_EXCLUDE]
+
+                    //ust format
+                    stardate = event.startDate;
+                    frotime = event.fromTime;
+                    endate = event.endDate;
+                    totime = event.toTime;
+                    uname = event.host;
+                    description = event.description;
+                    title = event.title;
+                    eventtype = event.type;
+                    location = event.location;
+
                     mHostView.setText(event.host);
                     mDescriptionField.setText(event.description);
                     field_event_title.setText(event.title);
@@ -227,15 +257,15 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                     Log.e("EventViewHolder 2", dateVal);
                     String[] splited = dateVal.split("\\s+");
                     String[] splited1 = endDateVal.split("\\s+");
-                    String sdate = splited[0];
-                    String stime = splited[1];
-                    String edate = splited1[0];
-                    String etime = splited1[1];
+                    String stdate = splited[0];
+                    String sttime = splited[1];
+                    String eddate = splited1[0];
+                    String edtime = splited1[1];
 
 //                    activity_event_title_behind_txtView.setText(sdate);
-                    activity_event_title_txtView.setText(sdate);
-                    activity_event_time_txtView.setText(stime+ " - "+etime+ " Hrs");
-//                    mTimeView.setText(sdate);
+                    activity_event_title_txtView.setText(stdate);
+                    activity_event_time_txtView.setText(sttime+ " - "+edtime+ " Hrs");
+//                    mTimeView.setText(stdate);
                     CurrentEventHost = event.uid;
 
                     if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
@@ -373,7 +403,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private static class InvitedUserAdapter extends RecyclerView.Adapter<InvitedUserViewHolder> {
+    private class InvitedUserAdapter extends RecyclerView.Adapter<InvitedUserViewHolder> {
 
         private Context mContext;
         private DatabaseReference mDatabaseReference;
@@ -497,6 +527,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                 @Override
                 public void onClick(View v) {
                     mDatabaseReference.child(invitedUser.uid).child("status").setValue("Accepted");
+                    Log.e(TAG, "checkif" + stardate+" "+frotime+ " "+endate+" "+totime);
+                    checkIfAnyEventExists(stardate, frotime, endate, totime);
                 }
             });
 
@@ -504,6 +536,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                 @Override
                 public void onClick(View v) {
                     mDatabaseReference.child(invitedUser.uid).child("status").setValue("Rejected");
+                    FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).removeValue();
                 }
             });
             if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
@@ -521,6 +554,155 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             });
         }
 
+        public void checkIfAnyEventExists(final String startDate, final String fromTime, final String endDate, final String toTime) {
+
+            SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
+            String timeZone = (shared.getString(Constant.timeZone, ""));
+
+            //Default Time Zone Format
+            String startDateVal = DateUtils.convertToTimeZone(timeZone, startDate+" "+fromTime);
+            String endDateVal = DateUtils.convertToTimeZone(timeZone, endDate+" "+toTime);
+            String[] splited1 = startDateVal.split("\\s+");
+            String[] splited2 = endDateVal.split("\\s+");
+            stardate = splited1[0];
+            endate = splited2[0];
+            frotime = splited1[1];
+            totime = splited2[1];
+
+            Log.e(TAG, "checkif inside" + stardate+" "+frotime+ " "+endate+" "+totime);
+
+            FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    long daysInBetween = DateUtils.daysInBetween(stardate + " " + frotime, endate + " " + totime);
+                    for (long i = 0; i <= daysInBetween ; i++) {
+                        stardate = DateUtils.addDays(startDate, (int) i);
+                        if (dataSnapshot.getValue() == null) {
+                            Log.e(TAG, "null");
+                            writeNewEvent();
+                        } else {
+                            Log.e(TAG, "not null");
+                            detectCollidingEvents((Map<String, Object>) dataSnapshot.getValue(), stardate + " " + frotime, stardate + " " + totime);
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        public void detectCollidingEvents(Map<String, Object> users, String startDateTime, String endDateTime) {
+            Log.e(TAG, "Entering detectCollidingEvents...");
+            Log.e(TAG, startDateTime + " " + endDateTime);
+            allCollidingEvents.clear();
+            SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
+            String timeZone = (shared.getString(Constant.timeZone, ""));
+            Long newMinutesInBetween = DateUtils.minutesInBetween(startDateTime, endDateTime);
+            //iterate through each node
+            for (Map.Entry<String, Object> entry : users.entrySet()) {
+                try{
+
+                    //Get map
+                    Map singleUser = (Map) entry.getValue();
+                    Log.e(TAG, "Before Conversion...");
+                    Log.e(TAG, "sdat: "+ singleUser.get("startDate") + " " + singleUser.get("fromTime"));
+                    Log.e(TAG, "edat: "+ singleUser.get("endDate") + " " + singleUser.get("toTime"));
+
+                    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+                    String startDateString = singleUser.get("startDate") + " " + singleUser.get("fromTime");
+                    String endDateString = singleUser.get("endDate") + " " + singleUser.get("toTime");
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                    df.setTimeZone(TimeZone.getTimeZone("UST"));
+                    String sdat = formatter.format(df.parse(startDateString));
+                    String edat = formatter.format(df.parse(endDateString));
+                    Long existingMinutesInBetween = DateUtils.minutesInBetween(sdat, edat);
+                    Long availableMinutes = DateUtils.minutesInBetween(startDateTime, sdat);
+                    Log.e(TAG, newMinutesInBetween + " newMinutesInBetween");
+                    Log.e(TAG, existingMinutesInBetween + " existingMinutesInBetween");
+                    Log.e(TAG, availableMinutes + " available minutes");
+                    if (availableMinutes > 0) {
+                        if (availableMinutes <= newMinutesInBetween) {
+                            Log.e(TAG, "Collision occurs on" + entry.getKey());
+                            allCollidingEvents.add(entry.getKey());
+                        } else {
+                            Log.e(TAG, "Collision does not occur");
+                        }
+                    } else if (availableMinutes <= 0) {
+                        if (DateUtils.parseDate(edat).after(DateUtils.parseDate(startDateTime))) {
+                            Log.e(TAG, " colloision occurs" + entry.getKey());
+                            allCollidingEvents.add(entry.getKey());
+                        } else if (DateUtils.parseDate(edat).equals(DateUtils.parseDate(startDateTime))) {
+                            Log.e(TAG, " colloision occurs" + entry.getKey());
+                            allCollidingEvents.add(entry.getKey());
+                        } else if (DateUtils.parseDate(edat).before(DateUtils.parseDate(startDateTime))) {
+                            Log.e(TAG, "No Collision");
+                        }
+                    }
+
+                } catch (Exception e){
+
+                }
+            }
+            if (allCollidingEvents.isEmpty()) {
+                writeNewEvent();
+                finish();
+            } else {
+                showAlert("You already have " + allCollidingEvents.size() + " event(s) on " + stardate + " during this period.");
+            }
+        }
+
+        public void showAlert(String Message) {
+            // custom dialog
+            final Dialog dialog = new Dialog(EventDetailActivity.this);
+            dialog.setContentView(R.layout.alert_dialog);
+            dialog.setTitle("Event Alert");
+
+            // set the custom dialog components - text, image and button
+            TextView text = (TextView) dialog.findViewById(R.id.text);
+            text.setText(Message);
+
+            Button dialogButtonOK = (Button) dialog.findViewById(R.id.dialogButtonOK);
+            Button dialogButtonCancel = (Button) dialog.findViewById(R.id.dialogButtonCANCEL);
+            // if button is clicked, close the custom dialog
+            dialogButtonOK.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    writeNewEvent();
+                    finish();
+                    dialog.dismiss();
+                }
+            });
+            dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+
+            dialog.show();
+
+        }
+
+        public void writeNewEvent(){
+            String startDateVal = stardate+" "+frotime;
+            String endDateVal = endate+" "+totime;
+            String[] splited1 = startDateVal.split("\\s+");
+            String[] splited2 = endDateVal.split("\\s+");
+            stardate = splited1[0];
+            endate = splited2[0];
+            frotime = splited1[1];
+            totime = splited2[1];
+            Event event = new Event(getUid(), uname, title, location,  stardate, stardate, frotime, totime, eventtype, description);
+            FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).setValue(event);
+            FirebaseDatabase.getInstance().getReference().child("Invites").child(getUid()).child(mEventKey).removeValue();
+            notificationFunctions.setNotification("on", stardate, frotime, title, mEventKey);
+        }
+
         @Override
         public int getItemCount() {
             return mInvitedUser.size();
@@ -533,5 +715,6 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         }
 
     }
+
 
 }

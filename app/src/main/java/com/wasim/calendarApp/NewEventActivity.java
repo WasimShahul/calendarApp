@@ -37,6 +37,7 @@ import com.wasim.calendarApp.models.User;
 import com.wasim.calendarApp.utils.Constant;
 import com.wasim.calendarApp.utils.DateUtils;
 import com.wasim.calendarApp.utils.FontFaces;
+import com.wasim.calendarApp.utils.NotificationFunctions;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -73,11 +74,11 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
     private TextView mSubmitButton;
 //    private FloatingActionButton mSubmitButton;
     private CheckBox checkBox;
-    private Spinner event_type_spinner;
-    private static String event_type_selected;
+    private Spinner event_type_spinner, event_notification_spinner;
+    private static String event_type_selected, event_notification_selected;
 
-    private TextView activity_title_txtView, location_heading_txtView, title_txtView, app_name_txtView, description_heading_txtView, from_txtView, to_txtView, start_time_txtView, end_time_txtView, add_users_txtView, event_type_begin_txtView, event_type_end_txtView;
-
+    private TextView activity_title_txtView, location_heading_txtView, title_txtView, app_name_txtView, description_heading_txtView, from_txtView, to_txtView, start_time_txtView, end_time_txtView, add_users_txtView, event_type_begin_txtView, event_type_end_txtView, event_notification_begin_txtView, event_notification_end_txtView;
+    NotificationFunctions notificationFunctions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         setContentView(R.layout.activity_new_event);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        notificationFunctions = new NotificationFunctions(this);
 
         mStartDateField = (EditText) findViewById(R.id.field_from_date);
         mEndDateField = (EditText) findViewById(R.id.field_to_date);
@@ -108,7 +110,10 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         mUsersField = (MultiAutoCompleteTextView) findViewById(R.id.field_users);
         checkBox = (CheckBox) findViewById(R.id.checkBox);
         mSubmitButton = (TextView) findViewById(R.id.fab_submit_event);
+        event_notification_begin_txtView = (TextView) findViewById(R.id.event_notification_begin_txtView);
+        event_notification_end_txtView = (TextView) findViewById(R.id.event_notification_end_txtView);
         event_type_spinner = (Spinner) findViewById(R.id.event_type_spinner);
+        event_notification_spinner = (Spinner) findViewById(R.id.event_notification_spinner);
 
 
         activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
@@ -120,7 +125,9 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         mUsersField.setTypeface(FontFaces.montserratRegular(this));
         description_heading_txtView.setTypeface(FontFaces.montserratRegular(this));
         event_type_begin_txtView.setTypeface(FontFaces.montserratRegular(this));
+        event_notification_begin_txtView.setTypeface(FontFaces.montserratRegular(this));
         event_type_end_txtView.setTypeface(FontFaces.montserratRegular(this));
+        event_notification_end_txtView.setTypeface(FontFaces.montserratRegular(this));
         add_users_txtView.setTypeface(FontFaces.montserratRegular(this));
         field_title.setTypeface(FontFaces.montserratRegular(this));
         title_txtView.setTypeface(FontFaces.montserratRegular(this));
@@ -137,6 +144,27 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
 
         event_type_spinner.setOnItemSelectedListener(this);
 
+        event_notification_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                event_notification_selected = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                event_notification_selected = "10 min before";
+            }
+        });
+
+        List<String> event_notification = new ArrayList<String>();
+        event_notification.add("on");
+        event_notification.add("10 min before");
+        event_notification.add("1 hour before");
+        event_notification.add("5 hour before");
+        event_notification.add("1 day before");
+        ArrayAdapter<String> dataAdapterNotificaiton = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, event_notification);
+        dataAdapterNotificaiton.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        event_notification_spinner.setAdapter(dataAdapterNotificaiton);
 
         List<String> event_type = new ArrayList<String>();
         event_type.add("public");
@@ -494,7 +522,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
     }
 
     // [START write_fan_out]
-    private void writeNewEvent(String userId, String title, String location, String username, String startDate, String endDate, String fromTime, String toTime, String type, String description, ArrayList<String> selectedUsersIds) {
+    private void writeNewEvent(String userId, String username, String title, String location,  String startDate, String endDate, String fromTime, String toTime, String type, String description, ArrayList<String> selectedUsersIds) {
 
         try{
             DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -519,7 +547,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
             final String key = mDatabase.child("Events").push().getKey();
             final DatabaseReference InvitedUserReference = FirebaseDatabase.getInstance().getReference().child("Events").child(key).child("users");
 
-            Event event = new Event(userId, title, location, username, startDate, endDate, fromTime, toTime, type, description);
+            final Event event = new Event(userId, username, title, location, startDate, endDate, fromTime, toTime, type, description);
             Map<String, Object> eventValues = event.toMap();
 
             Map<String, Object> childUpdates = new HashMap<>();
@@ -537,6 +565,13 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 // Get user information
                                 InvitedUser invitedUser = new InvitedUser(id, getEmailFromId(id), "pending");
+
+                                Map<String, Object> eventValues = event.toMap();
+                                String path = "/Invites/"+id;
+                                Map<String, Object> childUpdates = new HashMap<>();
+                                childUpdates.put(path+ key, eventValues);
+
+                                FirebaseDatabase.getInstance().getReference().child("Invites").child(id).child(key).setValue(eventValues);
                                 InvitedUserReference.child(id).setValue(invitedUser);
                             }
 
@@ -546,6 +581,9 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
                             }
                         });
             }
+
+            notificationFunctions.setNotification(event_notification_selected, startDate, fromTime, title, key);
+
         } catch (Exception e){
 
         }
@@ -651,7 +689,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         }
         if (allCollidingEvents.isEmpty()) {
             Toast.makeText(this, "Creating Event...", Toast.LENGTH_SHORT).show();
-            writeNewEvent(getUid(), field_title.getText().toString(), field_event_location.getText().toString(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+            writeNewEvent(getUid(), uname, field_title.getText().toString(), field_event_location.getText().toString(),  sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
             // Finish this Activity, back to the stream
             setEditingEnabled(true);
             finish();
@@ -678,7 +716,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         dialogButtonOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                writeNewEvent(getUid(), field_title.getText().toString(), field_event_location.getText().toString(), uname, sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
+                writeNewEvent(getUid(), uname, field_title.getText().toString(), field_event_location.getText().toString(),  sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
                 // Finish this Activity, back to the stream
                 setEditingEnabled(true);
                 finish();
@@ -695,4 +733,6 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
         dialog.show();
 
     }
+
+
 }

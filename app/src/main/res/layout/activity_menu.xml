@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    tools:context="com.wasim.calendarApp.MenuActivity">
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/activity_event_title_behind_txtView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="MENU"
+            android:textColor="#60ffffff"
+            android:textSize="70dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/activity_event_menu_txtView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/activity_event_title_behind_txtView"
+            android:layout_marginTop="5dp"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:textColor="@color/activity_title_white_color"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/menu_all_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="@string/all_events"
+            android:textColor="@color/activity_title_white_color"
+            android:textSize="@dimen/activity_title_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/menu_create_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="@string/create_event"
+            android:textColor="@color/activity_title_white_color"
+            android:textSize="@dimen/activity_title_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/menu_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="@string/logout"
+            android:textColor="@color/activity_title_white_color"
+            android:textSize="@dimen/activity_title_size"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/close_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/bottom_ll"
+        android:gravity="center"
+        android:padding="15dp">
+
+        <TextView
+            android:id="@+id/close_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/close"
+            android:textColor="@color/bottom__element" />
+
+    </LinearLayout>
+
+</RelativeLayout>

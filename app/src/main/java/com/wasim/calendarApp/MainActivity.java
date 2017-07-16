@@ -52,12 +52,13 @@ public class  MainActivity extends BaseActivity {
         // Create the adapter that will return a fragment for each section
         mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             private final Fragment[] mFragments = new Fragment[] {
-                    new AllEventsFragment(),
-                    new MyEventsFragment()
+                    new MyEventsFragment(),
+                    new AllEventsFragment()
             };
             private final String[] mFragmentNames = new String[] {
-                    getString(R.string.heading_all),
-                    getString(R.string.heading_my_events)
+                    getString(R.string.heading_my_events),
+                    getString(R.string.heading_invites)
+
             };
             @Override
             public Fragment getItem(int position) {
@@ -83,6 +84,7 @@ public class  MainActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, NewEventActivity.class));
+//                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
             }
         });
     }

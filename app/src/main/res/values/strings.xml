@@ -15,7 +15,8 @@
     <string name="hint_email">Email</string>
     <string name="sign_in">Sign In</string>
     <string name="heading_all">All Events</string>
-    <string name="heading_my_events">My Events</string>
+    <string name="heading_invites">Invites</string>
+    <string name="heading_my_events">Events</string>
 
     <string name="title_activity_my_events">MyEventsActivity</string>
     <string name="dummy_button">Dummy Button</string>
@@ -28,9 +29,19 @@
     <string name="end_time">FINISH</string>
     <string name="add_users">ADD USERS</string>
     <string name="create">CREATE</string>
+    <string name="close">CLOSE</string>
+    <string name="logout">LOGOUT</string>
+    <string name="all_events">ALL EVENTS</string>
     <string name="title">TITLE</string>
     <string name="event">EVENT</string>
+    <string name="welcome">WELCOME</string>
+    <string name="create_event">CREATE EVENT</string>
     <string name="hosted_by">HOSTED BY</string>
+    <string name="today">TODAY</string>
+    <string name="menu">MENU</string>
+    <string name="change_date">Change Date</string>
+    <string name="things_next">Upcomings Events</string>
+    <string name="things_now">Event Right Now</string>
 
 
     <!--Activity names-->

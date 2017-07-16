@@ -24,7 +24,7 @@ public class Event {
         // Default constructor required for calls to DataSnapshot.getValue(Event.class)
     }
 
-    public Event(String uid, String title, String location, String host, String startDate, String endDate, String fromTime,String toTime,String type,String description) {
+    public Event(String uid, String host, String title, String location,  String startDate, String endDate, String fromTime,String toTime,String type,String description) {
         this.uid = uid;
         this.host = host;
         this.startDate = startDate;

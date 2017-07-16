@@ -14,8 +14,8 @@ public class AllEventsFragment extends EventListFragment {
         // due to sorting by push() keys
 
 
-        Query recentPostsQuery = databaseReference.child("Events")
-                .limitToFirst(100);
+        Query recentPostsQuery = databaseReference.child("Invites").child(getUid()).limitToFirst(100);
+//        Query recentPostsQuery = databaseReference.child("Events").limitToFirst(100);
         // [END recent_posts_query]
 
         return recentPostsQuery;

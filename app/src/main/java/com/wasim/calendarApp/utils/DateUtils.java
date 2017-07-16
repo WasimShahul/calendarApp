@@ -175,6 +175,7 @@ public class DateUtils {
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        df.setTimeZone(TimeZone.getTimeZone("UST"));
         String dateFormat = null;
         try {
             dateFormat = formatter.format(df.parse(dateTime));
@@ -183,6 +184,32 @@ public class DateUtils {
         }
 
         return dateFormat;
+    }
+
+    public static Long addMinutesMillis(int minutes, Date date){
+        Date dateVal = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateVal);
+        Log.e(TAG, "Time before "+String.valueOf(cal.getTimeInMillis()));
+        cal.add(Calendar.MINUTE, minutes);
+        Log.e(TAG, "Time after "+String.valueOf(cal.getTimeInMillis()));
+        return cal.getTimeInMillis();
+    }
+
+    public static Long addHoursMillis(int hours, Date date){
+        Date dateVal = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateVal);
+        cal.add(Calendar.HOUR, hours);
+        return cal.getTimeInMillis();
+    }
+
+    public static Long addDaysMillis(int days, Date date){
+        Date dateVal = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateVal);
+        cal.add(Calendar.DATE, days);
+        return cal.getTimeInMillis();
     }
 
 }
