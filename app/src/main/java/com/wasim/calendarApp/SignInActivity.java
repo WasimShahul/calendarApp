@@ -166,7 +166,8 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
         editor.putString(Constant.timeZone, mTimeZoneField.getText().toString());
         editor.apply();
         // Go to MainActivity
-        startActivity(new Intent(SignInActivity.this, MainActivity.class));
+        startActivity(new Intent(SignInActivity.this, MyEventsActivity.class));
+        overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
         finish();
     }
 

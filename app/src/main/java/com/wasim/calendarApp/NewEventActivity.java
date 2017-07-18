@@ -1,13 +1,22 @@
 package com.wasim.calendarApp;
 
+import android.*;
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -69,6 +78,8 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
     private int year, month, day;
     private int hour, min;
 
+    SmsManager smsManager = SmsManager.getDefault();
+
     private EditText mStartDateField, mEndDateField, field_title, mFromTimeField, mToTimeField, mDescriptionField, field_event_location;
     private MultiAutoCompleteTextView mUsersField;
     private TextView mSubmitButton;
@@ -79,6 +90,8 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
 
     private TextView activity_title_txtView, location_heading_txtView, title_txtView, app_name_txtView, description_heading_txtView, from_txtView, to_txtView, start_time_txtView, end_time_txtView, add_users_txtView, event_type_begin_txtView, event_type_end_txtView, event_notification_begin_txtView, event_notification_end_txtView;
     NotificationFunctions notificationFunctions;
+
+    private static final int READ_SMS_PERMISSIONS_REQUEST = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -582,6 +595,9 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
                         });
             }
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                sendSms(title, "+919486749788");
+            }
             notificationFunctions.setNotification(event_notification_selected, startDate, fromTime, title, key);
 
         } catch (Exception e){
@@ -618,6 +634,8 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
                     Log.e(TAG, "null");
                     writeNewEvent(getUid(), uname, field_title.getText().toString(), field_event_location.getText().toString(), sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
                     setEditingEnabled(true);
+                    startActivity(new Intent(NewEventActivity.this, MainActivity.class));
+                    overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
                     finish();
                 } else {
                     Log.e(TAG, "not null");
@@ -692,6 +710,8 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
             writeNewEvent(getUid(), uname, field_title.getText().toString(), field_event_location.getText().toString(),  sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
             // Finish this Activity, back to the stream
             setEditingEnabled(true);
+            startActivity(new Intent(NewEventActivity.this, MainActivity.class));
+            overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
             finish();
         } else {
             setEditingEnabled(true);
@@ -719,6 +739,8 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
                 writeNewEvent(getUid(), uname, field_title.getText().toString(), field_event_location.getText().toString(),  sdate, sdate, ftime, ttime, event_type_selected, mDescriptionField.getText().toString(), selectedUsersIds);
                 // Finish this Activity, back to the stream
                 setEditingEnabled(true);
+                startActivity(new Intent(NewEventActivity.this, MainActivity.class));
+                overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
                 finish();
                 dialog.dismiss();
             }
@@ -734,5 +756,60 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(NewEventActivity.this, MyEventsActivity.class));
+        overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
+        finish();
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void sendSms(String message, String number){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            getPermissionToReadSMS();
+        } else {
+            smsManager.sendTextMessage(number, null, message, null, null);
+            Toast.makeText(this, "Message will be sent on scheduled time!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void getPermissionToReadSMS() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.READ_SMS)) {
+                Toast.makeText(this, "Please allow permission!", Toast.LENGTH_SHORT).show();
+            }
+            requestPermissions(new String[]{Manifest.permission.READ_SMS},
+                    READ_SMS_PERMISSIONS_REQUEST);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        // Make sure it's our original READ_CONTACTS request
+        if (requestCode == READ_SMS_PERMISSIONS_REQUEST) {
+            if (grantResults.length == 1 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Read SMS permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Read SMS permission denied", Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+
+    }
 }

@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -48,8 +49,10 @@ public class MyEventsActivity extends AppCompatActivity {
     RecyclerView today_event_list;
     EventAdapter eventAdapter;
     Calendar myCalendar = Calendar.getInstance();
+    FloatingActionButton fab_button;
 
     ArrayList<Event> event_list = new ArrayList<>();
+    ArrayList<String> event_ids = new ArrayList<>();
     SharedPreferences shared;
     String timeZone;
 
@@ -78,6 +81,7 @@ public class MyEventsActivity extends AppCompatActivity {
         now_event_ll = (LinearLayout) findViewById(R.id.now_event_ll);
         bottom_menu = (LinearLayout) findViewById(R.id.bottom_menu);
         today_event_list = (RecyclerView) findViewById(R.id.today_event_list);
+        fab_button = (FloatingActionButton) findViewById(R.id.fab_button);
 
         activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
         app_name_txtView.setTypeface(FontFaces.montserratBold(this));
@@ -133,6 +137,16 @@ public class MyEventsActivity extends AppCompatActivity {
             }
         });
 
+        fab_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MyEventsActivity.this, NewEventActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
+
 
     }
 
@@ -171,9 +185,11 @@ public class MyEventsActivity extends AppCompatActivity {
 
                 //Clear array list
                 event_list.clear();
+                event_ids.clear();
                 for (DataSnapshot datasnapshot1 :
                         dataSnapshot.getChildren()) {
                     Event event = datasnapshot1.getValue(Event.class);
+
                     String startDateTime = DateUtils.convertToTimeZone(timeZone, event.startDate + " " + event.fromTime);
                     String endDateTime = DateUtils.convertToTimeZone(timeZone, event.endDate + " " + event.toTime);
                     String[] splited = startDateTime.split("\\s+");
@@ -200,11 +216,12 @@ public class MyEventsActivity extends AppCompatActivity {
                             if (sdate.equals(receivedDate)) {
                                 Log.e(TAG, event.title);
                                 event_list.add(event1);
+                                event_ids.add(datasnapshot1.getKey());
                             }
                         }
                 }
 
-                eventAdapter = new EventAdapter(MyEventsActivity.this, event_list);
+                eventAdapter = new EventAdapter(MyEventsActivity.this, event_list, event_ids);
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
                 today_event_list.setLayoutManager(mLayoutManager);
                 today_event_list.setItemAnimator(new DefaultItemAnimator());

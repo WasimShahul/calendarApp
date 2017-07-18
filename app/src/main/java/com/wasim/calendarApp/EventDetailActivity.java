@@ -148,24 +148,6 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mInviteButton.setOnClickListener(this);
         mUsersRecycler.setLayoutManager(new LinearLayoutManager(this));
 
-        mDescriptionField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-//                FirebaseDatabase.getInstance().getReference().child("Events").child(mEventKey).child("description").setValue(mDescriptionField.getText().toString());
-//                FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).child("description").setValue(mDescriptionField.getText().toString());
-            }
-        });
-
         getAllUserEmail();
 
     }
@@ -716,5 +698,9 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

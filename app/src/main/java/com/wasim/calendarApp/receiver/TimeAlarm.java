@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.SmsManager;
 
 import com.wasim.calendarApp.EventDetailActivity;
 import com.wasim.calendarApp.MainActivity;
@@ -31,7 +32,7 @@ public class TimeAlarm extends BroadcastReceiver {
                         .setContentTitle(intent.getStringExtra("title"));
 
         Intent notificationIntent = new Intent(context, EventDetailActivity.class);
-        intent.putExtra("event_key", intent.getStringExtra("key"));
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_KEY, intent.getStringExtra("key"));
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -55,5 +56,9 @@ public class TimeAlarm extends BroadcastReceiver {
 //        Notification notif = new Notification(R.drawable.appicon, "Crazy About Android...", System.currentTimeMillis());
 //        notif.setLatestEventInfo(context, from, message, contentIntent);
 //        nm.notify(1, notif);
+
+
     }
+
+
 }

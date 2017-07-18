@@ -72,16 +72,15 @@
 
 
 
-    <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/fab_new_event"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--app:rippleColor="@color/colorAccent"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:src="@drawable/ic_image_edit"-->
-        <!--android:visibility="gone"-->
-        <!--android:layout_margin="16dp"/>-->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:backgroundTint="@color/colorAccent"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_image_edit"
+        android:layout_margin="16dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -96,7 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:textColor="@color/bottom__element"
-            android:text="CREATE NEW EVENT" />
+            android:text="MENU" />
 
     </LinearLayout>
 

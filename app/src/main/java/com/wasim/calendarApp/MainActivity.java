@@ -18,6 +18,7 @@ package com.wasim.calendarApp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -35,7 +36,7 @@ import com.wasim.calendarApp.utils.FontFaces;
 public class  MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
-
+    private FloatingActionButton fab_button;
     private FragmentPagerAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private TextView activity_title_txtView, fab_new_event;
@@ -47,6 +48,7 @@ public class  MainActivity extends BaseActivity {
 
         activity_title_txtView = (TextView) findViewById(R.id.activity_title_txtView);
         fab_new_event = (TextView) findViewById(R.id.fab_new_event);
+        fab_button = (FloatingActionButton) findViewById(R.id.fab_button);
         activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
         fab_new_event.setTypeface(FontFaces.montserratBold(this));
         // Create the adapter that will return a fragment for each section
@@ -79,14 +81,26 @@ public class  MainActivity extends BaseActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        // Button launches NewEventActivity
+        // Button launches Menu
         findViewById(R.id.fab_new_event).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, NewEventActivity.class));
-//                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                startActivity(new Intent(MainActivity.this, MenuActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
             }
         });
+
+        // Button launches NewEventActivity
+        findViewById(R.id.fab_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, NewEventActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
+
     }
 
     @Override

@@ -9,6 +9,8 @@ import android.icu.util.Calendar;
 import android.util.Log;
 
 import com.wasim.calendarApp.MyEventsActivity;
+import com.wasim.calendarApp.receiver.SendSms;
+import com.wasim.calendarApp.receiver.SmsBroadcastReceiver;
 import com.wasim.calendarApp.receiver.TimeAlarm;
 
 import java.text.ParseException;
@@ -74,9 +76,14 @@ public class NotificationFunctions {
         am.set(AlarmManager.RTC_WAKEUP, millis, pendingIntent);
     }
 
-    public void setRepeatingAlarm() {
-        Intent intent = new Intent(context, TimeAlarm.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), (5 * 1000), pendingIntent);
+    public void setSmsSchedule(long millis, String number, String message) {
+        Intent intent = new Intent(context, SendSms.class);
+        Log.e(TAG, number+" : "+message+" : "+millis);
+        intent.putExtra("number",number);
+        intent.putExtra("message",message);
+        Random r = new Random();
+        int id = r.nextInt(99 - 1 + 1) + 1;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_ONE_SHOT);
+        am.set(AlarmManager.RTC_WAKEUP, millis, pendingIntent);
     }
 }

@@ -3,6 +3,13 @@
     package="com.wasim.calendarApp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+
 
     <application
         android:allowBackup="true"
@@ -12,6 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <receiver android:name=".receiver.TimeAlarm" />
+        <receiver android:name=".receiver.SendSms" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -34,16 +43,29 @@
         <activity
             android:name=".MyEventsActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
-        <activity android:name=".MenuActivity"
+        <activity
+            android:name=".MenuActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
 
-    </application>
+        <receiver
+            android:name=".receiver.SmsBroadcastReceiver"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
 
+        <activity
+            android:name=".PeriodicSMSActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
+    </application>
 
 </manifest>
