@@ -598,6 +598,7 @@ public class NewEventActivity extends BaseActivity implements AdapterView.OnItem
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                sendSms(title, "+919486749788");
             }
+            Log.e(TAG, "key:"+key);
             notificationFunctions.setNotification(event_notification_selected, startDate, fromTime, title, key);
 
         } catch (Exception e){

@@ -30,16 +30,22 @@
     <string name="end_time">FINISH</string>
     <string name="add_users">ADD USERS</string>
     <string name="create">CREATE</string>
+    <string name="update">UPDATE</string>
     <string name="schedule">SCHEDULE</string>
     <string name="close">CLOSE</string>
     <string name="logout">LOGOUT</string>
     <string name="all_events">ALL EVENTS</string>
     <string name="title">TITLE</string>
     <string name="message">MESSAGE</string>
+    <string name="audio_message">AUDIO MESSAGE</string>
+    <string name="video_message">VIDEO MESSAGE</string>
+    <string name="record">RECORD</string>
     <string name="event">EVENT</string>
     <string name="welcome">WELCOME</string>
     <string name="create_event">CREATE EVENT</string>
     <string name="periodic_sms">TIMELY SMS</string>
+    <string name="periodic_video_sms">VIDEO SMS</string>
+    <string name="periodic_audio">TIMELY AUDIO</string>
     <string name="on">ON</string>
     <string name="at">AT</string>
     <string name="hosted_by">HOSTED BY</string>
@@ -53,4 +59,5 @@
 
     <!--Activity names-->
     <string name="new_event_activity">CREATE EVENT</string>
+    <string name="edit_event_activity">EDIT EVENT</string>
 </resources>

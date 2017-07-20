@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/whitebackground"
     tools:context=".MainActivity">
 
@@ -28,7 +29,7 @@
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/app_name_txtView"
@@ -41,7 +42,7 @@
                 android:layout_marginTop="15dp"
                 android:text="@string/app_name"
                 android:textSize="14dp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </RelativeLayout>
 
@@ -50,14 +51,14 @@
     <TextView
         android:id="@+id/activity_title_txtView"
         android:layout_width="wrap_content"
-        android:layout_below="@id/title_ll"
         android:layout_height="wrap_content"
+        android:layout_below="@id/title_ll"
+        android:layout_centerInParent="true"
         android:layout_marginLeft="@dimen/activity_title_margin_left"
         android:shadowColor="@color/divider"
         android:shadowDx="8"
         android:shadowDy="8"
         android:shadowRadius="5"
-        android:layout_centerInParent="true"
         android:text="CALENDAR APP"
         android:textColor="@color/activity_title_color"
         android:textSize="@dimen/activity_title_size"
@@ -71,16 +72,16 @@
         android:layout_below="@id/activity_title_txtView" />
 
 
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:backgroundTint="@color/colorAccent"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/ic_image_edit"
-        android:layout_margin="16dp"/>
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:id="@+id/fab_button"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_margin="16dp"-->
+        <!--android:src="@drawable/ic_image_edit"-->
+        <!--android:visibility="gone"-->
+        <!--app:backgroundTint="@color/colorAccent" />-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -94,9 +95,60 @@
             android:id="@+id/fab_new_event"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:textColor="@color/bottom__element"
-            android:text="MENU" />
+            android:text="MENU"
+            android:textColor="@color/bottom__element" />
 
     </LinearLayout>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/menu_labels_right"
+        android:layout_width="wrap_content"
+        fab:menu_shadowColor="#444"
+        fab:menu_colorNormal="@color/colorAccent"
+        fab:menu_colorPressed="#F2AB00"
+        fab:menu_colorRipple="#D99200"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_image_edit">
+
+        <com.github.clans.fab.FloatingActionButton
+            fab:fab_label="Scheduled Video Message"
+            android:id="@+id/fab_periodic_video_button"
+            fab:fab_size="normal"
+            fab:menu_shadowColor="#444"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="#F2AB00"
+            fab:menu_colorRipple="#D99200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_video" />
+
+        <com.github.clans.fab.FloatingActionButton
+            fab:fab_label="Scheduled Audio Message"
+            android:id="@+id/fab_periodic_button"
+            fab:fab_size="normal"
+            fab:menu_shadowColor="#444"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="#F2AB00"
+            fab:menu_colorRipple="#D99200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_mic" />
+
+        <com.github.clans.fab.FloatingActionButton
+            fab:fab_label="Create New Event"
+            android:id="@+id/fab_create_event_button"
+            fab:fab_size="normal"
+            fab:menu_shadowColor="#444"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="#F2AB00"
+            fab:menu_colorRipple="#D99200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit" />
+
+    </com.github.clans.fab.FloatingActionMenu>
 
 </RelativeLayout>

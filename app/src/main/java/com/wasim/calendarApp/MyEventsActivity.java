@@ -49,7 +49,7 @@ public class MyEventsActivity extends AppCompatActivity {
     RecyclerView today_event_list;
     EventAdapter eventAdapter;
     Calendar myCalendar = Calendar.getInstance();
-    FloatingActionButton fab_button;
+    FloatingActionButton fab_button, fab_periodic_button, fab_create_event_button;
 
     ArrayList<Event> event_list = new ArrayList<>();
     ArrayList<String> event_ids = new ArrayList<>();
@@ -81,7 +81,6 @@ public class MyEventsActivity extends AppCompatActivity {
         now_event_ll = (LinearLayout) findViewById(R.id.now_event_ll);
         bottom_menu = (LinearLayout) findViewById(R.id.bottom_menu);
         today_event_list = (RecyclerView) findViewById(R.id.today_event_list);
-        fab_button = (FloatingActionButton) findViewById(R.id.fab_button);
 
         activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
         app_name_txtView.setTypeface(FontFaces.montserratBold(this));
@@ -116,6 +115,34 @@ public class MyEventsActivity extends AppCompatActivity {
             }
         });
 
+        // Button launches NewEventActivity
+        findViewById(R.id.fab_create_event_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MyEventsActivity.this, NewEventActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
+        // Button launches NewEventActivity
+        findViewById(R.id.fab_periodic_video_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MyEventsActivity.this, PeriodicVideoSMSActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
+        // Button launches NewEventActivity
+        findViewById(R.id.fab_periodic_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MyEventsActivity.this, PeriodicSMSActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
+
         bottom_menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,15 +164,15 @@ public class MyEventsActivity extends AppCompatActivity {
             }
         });
 
-        fab_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MyEventsActivity.this, NewEventActivity.class);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
-                finish();
-            }
-        });
+//        fab_button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(MyEventsActivity.this, NewEventActivity.class);
+//                startActivity(intent);
+//                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+//                finish();
+//            }
+//        });
 
 
     }
@@ -199,26 +226,26 @@ public class MyEventsActivity extends AppCompatActivity {
                     String edate = splited1[0];
                     String etime = splited1[1];
                     Event event1 = new Event(event.uid, event.host, event.title, event.location, sdate, edate, stime, etime, event.type, event.description);
-                    Log.e(TAG, dateTime+" : "+startDateTime+" "+endDateTime);
+                    Log.e(TAG, dateTime + " : " + startDateTime + " " + endDateTime);
                     Log.e(TAG, String.valueOf(DateUtils.isDateInBetween(dateTime, startDateTime, endDateTime)));
 
                     Calendar c = Calendar.getInstance();
                     SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                     final String formattedDate = df.format(c.getTime());
 
-                        if (DateUtils.isDateInBetween(formattedDate, startDateTime, endDateTime)) {
-                            now_event_ll.setVisibility(View.VISIBLE);
-                            Log.e(TAG, "Inside"+ event.title);
-                            event_title.setText(event.title);
-                            event_date.setText(sdate);
-                            event_time.setText(stime + " - " + etime);
-                        } else {
-                            if (sdate.equals(receivedDate)) {
-                                Log.e(TAG, event.title);
-                                event_list.add(event1);
-                                event_ids.add(datasnapshot1.getKey());
-                            }
+                    if (DateUtils.isDateInBetween(formattedDate, startDateTime, endDateTime)) {
+                        now_event_ll.setVisibility(View.VISIBLE);
+                        Log.e(TAG, "Inside" + event.title);
+                        event_title.setText(event.title);
+                        event_date.setText(sdate);
+                        event_time.setText(stime + " - " + etime);
+                    } else {
+                        if (sdate.equals(receivedDate)) {
+                            Log.e(TAG, event.title);
+                            event_list.add(event1);
+                            event_ids.add(datasnapshot1.getKey());
                         }
+                    }
                 }
 
                 eventAdapter = new EventAdapter(MyEventsActivity.this, event_list, event_ids);

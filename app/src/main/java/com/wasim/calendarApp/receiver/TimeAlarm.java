@@ -32,7 +32,7 @@ public class TimeAlarm extends BroadcastReceiver {
                         .setContentTitle(intent.getStringExtra("title"));
 
         Intent notificationIntent = new Intent(context, EventDetailActivity.class);
-        intent.putExtra(EventDetailActivity.EXTRA_EVENT_KEY, intent.getStringExtra("key"));
+        notificationIntent.putExtra(EventDetailActivity.EXTRA_EVENT_KEY, intent.getStringExtra("key"));
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);

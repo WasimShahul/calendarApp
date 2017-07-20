@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -242,17 +243,6 @@
 
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:backgroundTint="@color/colorAccent"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/ic_image_edit"
-        android:layout_margin="16dp"/>
-
-    <!--Menu-->
     <LinearLayout
         android:id="@+id/bottom_menu"
         android:layout_width="match_parent"
@@ -270,5 +260,68 @@
             android:textColor="@color/bottom__element" />
 
     </LinearLayout>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/menu_labels_right"
+        android:layout_width="wrap_content"
+        fab:menu_shadowColor="#444"
+        fab:menu_colorNormal="@color/colorAccent"
+        fab:menu_colorPressed="#F2AB00"
+        fab:menu_colorRipple="#D99200"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_image_edit">
+
+        <com.github.clans.fab.FloatingActionButton
+            fab:fab_label="Scheduled Video Message"
+            android:id="@+id/fab_periodic_video_button"
+            fab:fab_size="normal"
+            fab:menu_shadowColor="#444"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="#F2AB00"
+            fab:menu_colorRipple="#D99200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_video" />
+
+        <com.github.clans.fab.FloatingActionButton
+            fab:fab_label="Scheduled Audio Message"
+            android:id="@+id/fab_periodic_button"
+            fab:fab_size="normal"
+            fab:menu_shadowColor="#444"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="#F2AB00"
+            fab:menu_colorRipple="#D99200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_mic" />
+
+        <com.github.clans.fab.FloatingActionButton
+            fab:fab_label="Create New Event"
+            android:id="@+id/fab_create_event_button"
+            fab:fab_size="normal"
+            fab:menu_shadowColor="#444"
+            fab:menu_colorNormal="@color/colorAccent"
+            fab:menu_colorPressed="#F2AB00"
+            fab:menu_colorRipple="#D99200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit" />
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:id="@+id/fab_button"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--app:backgroundTint="@color/colorAccent"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:src="@drawable/ic_image_edit"-->
+        <!--android:layout_margin="16dp"/>-->
+
+    <!--Menu-->
 
 </RelativeLayout>

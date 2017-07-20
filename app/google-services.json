@@ -46,6 +46,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "398699211518-1tjufsbdlup0ej29ml9ed1tjrb0ei29q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wasim.calendarApp",
+            "certificate_hash": "a293c4a47a79ecc3820b3037fc9979fa77d0a832"
+          }
+        },
+        {
           "client_id": "398699211518-ha8e7kl0pjdt8kns0i0qhucou073ji5r.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -60,8 +68,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "398699211518-ha8e7kl0pjdt8kns0i0qhucou073ji5r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

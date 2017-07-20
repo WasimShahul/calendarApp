@@ -2,6 +2,7 @@ package com.wasim.calendarApp;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -77,13 +78,15 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private static String CurrentEventHost;
 
     private TextView mHostView;
-    private LinearLayout InviteUsersForm;
+    private LinearLayout InviteUsersForm, update_ll;
     private TextView mDateView;
-    private TextView mTimeView,mDescriptionField, textView, field_event_title, activity_event_title_behind_txtView, activity_event_title_txtView, activity_event_time_txtView;
+    private TextView mTimeView, mDescriptionField, delete_event, edit_event, textView, field_event_title, activity_event_title_behind_txtView, activity_event_title_txtView, activity_event_time_txtView;
     private Button mInviteButton;
     private ImageView mViewMoreButton;
     private RecyclerView mUsersRecycler;
     private Spinner event_type_spinner;
+    static ArrayList<String> invitesUserIds = null;
+    private static Event event;
 
     //User Selection
     ArrayList<String> usersEmail = new ArrayList<String>();
@@ -92,6 +95,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     private MultiAutoCompleteTextView mUsersField;
     public List<String> event_type;
     public ArrayAdapter<String> dataAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +119,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mDateView = (TextView) findViewById(R.id.event_date);
         mTimeView = (TextView) findViewById(R.id.event_time);
         textView = (TextView) findViewById(R.id.textView);
+        delete_event = (TextView) findViewById(R.id.delete_event);
+        edit_event = (TextView) findViewById(R.id.edit_event);
         field_event_title = (TextView) findViewById(R.id.field_event_title);
         activity_event_time_txtView = (TextView) findViewById(R.id.activity_event_time_txtView);
         activity_event_title_txtView = (TextView) findViewById(R.id.activity_event_title_txtView);
@@ -126,6 +132,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mInviteButton = (Button) findViewById(R.id.button_event_invite);
         mViewMoreButton = (ImageView) findViewById(R.id.viewmorebtn);
         InviteUsersForm = (LinearLayout) findViewById(R.id.invite_users_form);
+        update_ll = (LinearLayout) findViewById(R.id.update_ll);
         mUsersRecycler = (RecyclerView) findViewById(R.id.recycler_invited_users);
 
         activity_event_title_behind_txtView.setTypeface(FontFaces.montserratBold(this));
@@ -134,6 +141,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mUsersField.setTypeface(FontFaces.montserratRegular(this));
         textView.setTypeface(FontFaces.montserratRegular(this));
         mDateView.setTypeface(FontFaces.montserratBold(this));
+        delete_event.setTypeface(FontFaces.montserratBold(this));
+        edit_event.setTypeface(FontFaces.montserratBold(this));
         mInviteButton.setTypeface(FontFaces.montserratBold(this));
         field_event_title.setTypeface(FontFaces.montserratBold(this));
         activity_event_time_txtView.setTypeface(FontFaces.montserratBold(this));
@@ -147,9 +156,56 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
         mViewMoreButton.setVisibility(View.INVISIBLE);
         mInviteButton.setOnClickListener(this);
         mUsersRecycler.setLayoutManager(new LinearLayoutManager(this));
+        delete_event.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteEvent(mEventKey);
+            }
+        });
+        edit_event.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editEvent();
+            }
+        });
 
         getAllUserEmail();
 
+    }
+
+
+    private void deleteEvent(String eventId) {
+        finish();
+        removeAllInvitedUsers(eventId);
+        FirebaseDatabase.getInstance().getReference().child("Events").child(eventId).removeValue();
+        FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(eventId).removeValue();
+    }
+
+    private void removeAllInvitedUsers(final String eventId) {
+        FirebaseDatabase.getInstance().getReference().child("Events").child(eventId).child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot datasnapshot1 :
+                        dataSnapshot.getChildren()) {
+                    InvitedUser invitedUser = datasnapshot1.getValue(InvitedUser.class);
+                    FirebaseDatabase.getInstance().getReference().child("Invites").child(invitedUser.uid).child(eventId).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        FirebaseDatabase.getInstance().getReference().child("Events").child(eventId).child("users").removeValue();
+    }
+
+    private void editEvent() {
+        Intent intent = new Intent(EventDetailActivity.this, EditEventActivity.class);
+        intent.putExtra("event_key",mEventKey);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
     }
 
     private Map<String, String> getAllUserEmail() {
@@ -203,65 +259,76 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
                 try {
 
+
                     // Get Event object and use the values to update the UI
-                    Event event = dataSnapshot.getValue(Event.class);
+                    event = dataSnapshot.getValue(Event.class);
                     // [START_EXCLUDE]
 
                     //ust format
-                    stardate = event.startDate;
-                    frotime = event.fromTime;
-                    endate = event.endDate;
-                    totime = event.toTime;
-                    uname = event.host;
-                    description = event.description;
-                    title = event.title;
-                    eventtype = event.type;
-                    location = event.location;
+                    if (event != null) {
+                        stardate = event.startDate;
 
-                    mHostView.setText(event.host);
-                    mDescriptionField.setText(event.description);
-                    field_event_title.setText(event.title);
-                    event_type_spinner.setSelection(dataAdapter.getPosition(event.type));
-                    SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
-                    String timeZone = (shared.getString(Constant.timeZone, ""));
-                    DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                    formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
-                    String startDateString = event.startDate + " " + event.fromTime;
-                    String endDateString = event.endDate + " " + event.toTime;
-                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                    df.setTimeZone(TimeZone.getTimeZone("UST"));
-                    String dateVal = null;
-                    String endDateVal = null;
+                        frotime = event.fromTime;
+                        endate = event.endDate;
+                        totime = event.toTime;
+                        uname = event.host;
+                        description = event.description;
+                        title = event.title;
+                        eventtype = event.type;
+                        location = event.location;
 
-                    dateVal = formatter.format(df.parse(startDateString));
-                    endDateVal = formatter.format(df.parse(endDateString));
 
-                    Log.e("EventViewHolder 2", dateVal);
-                    String[] splited = dateVal.split("\\s+");
-                    String[] splited1 = endDateVal.split("\\s+");
-                    String stdate = splited[0];
-                    String sttime = splited[1];
-                    String eddate = splited1[0];
-                    String edtime = splited1[1];
+                        if (title.equals("Scheduled Message")) {
+                            mUsersRecycler.setVisibility(View.GONE);
+                            InviteUsersForm.setVisibility(View.GONE);
+                        }
+                        mHostView.setText(event.host);
+                        mDescriptionField.setText(event.description);
+                        field_event_title.setText(event.title);
+                        event_type_spinner.setSelection(dataAdapter.getPosition(event.type));
+                        SharedPreferences shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
+                        String timeZone = (shared.getString(Constant.timeZone, ""));
+                        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                        formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+                        String startDateString = event.startDate + " " + event.fromTime;
+                        String endDateString = event.endDate + " " + event.toTime;
+                        DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                        df.setTimeZone(TimeZone.getTimeZone("UST"));
+                        String dateVal = null;
+                        String endDateVal = null;
+
+                        dateVal = formatter.format(df.parse(startDateString));
+                        endDateVal = formatter.format(df.parse(endDateString));
+
+                        Log.e("EventViewHolder 2", dateVal);
+                        String[] splited = dateVal.split("\\s+");
+                        String[] splited1 = endDateVal.split("\\s+");
+                        String stdate = splited[0];
+                        String sttime = splited[1];
+                        String eddate = splited1[0];
+                        String edtime = splited1[1];
 
 //                    activity_event_title_behind_txtView.setText(sdate);
-                    activity_event_title_txtView.setText(stdate);
-                    activity_event_time_txtView.setText(sttime+ " - "+edtime+ " Hrs");
+                        activity_event_title_txtView.setText(stdate);
+                        activity_event_time_txtView.setText(sttime + " - " + edtime + " Hrs");
 //                    mTimeView.setText(stdate);
-                    CurrentEventHost = event.uid;
+                        CurrentEventHost = event.uid;
 
-                    if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
-                        event_type_spinner.setEnabled(false);
-//                        field_event_title.setEnabled(false);
-//                        mDescriptionField.setEnabled(false);
-                        InviteUsersForm.setVisibility(View.VISIBLE);
+                        if (FirebaseAuth.getInstance().getCurrentUser().getUid().equals(CurrentEventHost)) {
+                            event_type_spinner.setEnabled(false);
+                            update_ll.setVisibility(View.VISIBLE);
+                            InviteUsersForm.setVisibility(View.VISIBLE);
+                        } else {
+                            event_type_spinner.setEnabled(false);
+                            update_ll.setVisibility(View.GONE);
+                            InviteUsersForm.setVisibility(View.GONE);
+                        }
                     } else {
-                        event_type_spinner.setEnabled(false);
-//                        mDescriptionField.setEnabled(false);
-                        InviteUsersForm.setVisibility(View.GONE);
+                        finish();
                     }
                     // [END_EXCLUDE]
                 } catch (ParseException e) {
+                    finish();
                     e.printStackTrace();
                 }
             }
@@ -326,6 +393,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             // Get user information
                             InvitedUser invitedUser = new InvitedUser(id, getEmailFromId(id), "pending");
+                            FirebaseDatabase.getInstance().getReference().child("Invites").child(id).child(mEventKey).setValue(event);
                             InvitedUserReference.child(id).setValue(invitedUser);
                         }
 
@@ -357,8 +425,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-     FirebaseDatabase.getInstance().getReference().child("Events").child(mEventKey).child("type").setValue(dataAdapter.getItem(position));
-     FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).child("type").setValue(dataAdapter.getItem(position));
+        FirebaseDatabase.getInstance().getReference().child("Events").child(mEventKey).child("type").setValue(dataAdapter.getItem(position));
+        FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).child("type").setValue(dataAdapter.getItem(position));
     }
 
     @Override
@@ -493,11 +561,11 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             final InvitedUser invitedUser = mInvitedUser.get(position);
             holder.hostTxtView.setText(invitedUser.email);
             holder.dateTimeTxtView.setText("Current status: " + invitedUser.status);
-            if(invitedUser.status.equals("Accepted")){
+            if (invitedUser.status.equals("Accepted")) {
                 holder.dateTimeTxtView.setTextColor(Color.GREEN);
-            } else if(invitedUser.status.equals("pending")){
+            } else if (invitedUser.status.equals("pending")) {
                 holder.dateTimeTxtView.setTextColor(Color.parseColor("#FFA000"));
-            } else if(invitedUser.status.equals("Rejected")){
+            } else if (invitedUser.status.equals("Rejected")) {
                 holder.dateTimeTxtView.setTextColor(Color.RED);
             }
             if (invitedUser.uid.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
@@ -509,7 +577,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                 @Override
                 public void onClick(View v) {
                     mDatabaseReference.child(invitedUser.uid).child("status").setValue("Accepted");
-                    Log.e(TAG, "checkif" + stardate+" "+frotime+ " "+endate+" "+totime);
+                    Log.e(TAG, "checkif" + stardate + " " + frotime + " " + endate + " " + totime);
                     checkIfAnyEventExists(stardate, frotime, endate, totime);
                 }
             });
@@ -542,8 +610,8 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             String timeZone = (shared.getString(Constant.timeZone, ""));
 
             //Default Time Zone Format
-            String startDateVal = DateUtils.convertToTimeZone(timeZone, startDate+" "+fromTime);
-            String endDateVal = DateUtils.convertToTimeZone(timeZone, endDate+" "+toTime);
+            String startDateVal = DateUtils.convertToTimeZone(timeZone, startDate + " " + fromTime);
+            String endDateVal = DateUtils.convertToTimeZone(timeZone, endDate + " " + toTime);
             String[] splited1 = startDateVal.split("\\s+");
             String[] splited2 = endDateVal.split("\\s+");
             stardate = splited1[0];
@@ -551,13 +619,13 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             frotime = splited1[1];
             totime = splited2[1];
 
-            Log.e(TAG, "checkif inside" + stardate+" "+frotime+ " "+endate+" "+totime);
+            Log.e(TAG, "checkif inside" + stardate + " " + frotime + " " + endate + " " + totime);
 
             FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     long daysInBetween = DateUtils.daysInBetween(stardate + " " + frotime, endate + " " + totime);
-                    for (long i = 0; i <= daysInBetween ; i++) {
+                    for (long i = 0; i <= daysInBetween; i++) {
                         stardate = DateUtils.addDays(startDate, (int) i);
                         if (dataSnapshot.getValue() == null) {
                             Log.e(TAG, "null");
@@ -586,13 +654,13 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
             Long newMinutesInBetween = DateUtils.minutesInBetween(startDateTime, endDateTime);
             //iterate through each node
             for (Map.Entry<String, Object> entry : users.entrySet()) {
-                try{
+                try {
 
                     //Get map
                     Map singleUser = (Map) entry.getValue();
                     Log.e(TAG, "Before Conversion...");
-                    Log.e(TAG, "sdat: "+ singleUser.get("startDate") + " " + singleUser.get("fromTime"));
-                    Log.e(TAG, "edat: "+ singleUser.get("endDate") + " " + singleUser.get("toTime"));
+                    Log.e(TAG, "sdat: " + singleUser.get("startDate") + " " + singleUser.get("fromTime"));
+                    Log.e(TAG, "edat: " + singleUser.get("endDate") + " " + singleUser.get("toTime"));
 
                     DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                     formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
@@ -626,7 +694,7 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
                         }
                     }
 
-                } catch (Exception e){
+                } catch (Exception e) {
 
                 }
             }
@@ -670,16 +738,16 @@ public class EventDetailActivity extends BaseActivity implements View.OnClickLis
 
         }
 
-        public void writeNewEvent(){
-            String startDateVal = stardate+" "+frotime;
-            String endDateVal = endate+" "+totime;
+        public void writeNewEvent() {
+            String startDateVal = stardate + " " + frotime;
+            String endDateVal = endate + " " + totime;
             String[] splited1 = startDateVal.split("\\s+");
             String[] splited2 = endDateVal.split("\\s+");
             stardate = splited1[0];
             endate = splited2[0];
             frotime = splited1[1];
             totime = splited2[1];
-            Event event = new Event(getUid(), uname, title, location,  stardate, stardate, frotime, totime, eventtype, description);
+            Event event = new Event(getUid(), uname, title, location, stardate, stardate, frotime, totime, eventtype, description);
             FirebaseDatabase.getInstance().getReference().child("user-events").child(getUid()).child(mEventKey).setValue(event);
             FirebaseDatabase.getInstance().getReference().child("Invites").child(getUid()).child(mEventKey).removeValue();
             notificationFunctions.setNotification("on", stardate, frotime, title, mEventKey);

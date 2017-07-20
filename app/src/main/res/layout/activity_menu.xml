@@ -95,6 +95,19 @@
             android:textSize="@dimen/activity_title_size"
             android:textStyle="bold" />
         <TextView
+            android:id="@+id/menu_timely_video_sms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:shadowColor="@color/divider"
+            android:shadowDx="8"
+            android:shadowDy="8"
+            android:shadowRadius="5"
+            android:text="@string/periodic_video_sms"
+            android:textColor="@color/activity_title_white_color"
+            android:textSize="@dimen/activity_title_size"
+            android:textStyle="bold" />
+        <TextView
             android:id="@+id/menu_timely_sms"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -107,7 +120,6 @@
             android:textColor="@color/activity_title_white_color"
             android:textSize="@dimen/activity_title_size"
             android:textStyle="bold" />
-
         <TextView
             android:id="@+id/menu_logout"
             android:layout_width="match_parent"

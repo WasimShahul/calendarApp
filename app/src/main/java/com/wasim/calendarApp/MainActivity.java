@@ -33,10 +33,10 @@ import com.wasim.calendarApp.fragment.MyEventsFragment;
 import com.wasim.calendarApp.fragment.AllEventsFragment;
 import com.wasim.calendarApp.utils.FontFaces;
 
-public class  MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
-    private FloatingActionButton fab_button;
+    private FloatingActionButton fab_periodic_button, fab_create_event_button;
     private FragmentPagerAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private TextView activity_title_txtView, fab_new_event;
@@ -48,28 +48,30 @@ public class  MainActivity extends BaseActivity {
 
         activity_title_txtView = (TextView) findViewById(R.id.activity_title_txtView);
         fab_new_event = (TextView) findViewById(R.id.fab_new_event);
-        fab_button = (FloatingActionButton) findViewById(R.id.fab_button);
         activity_title_txtView.setTypeface(FontFaces.montserratBold(this));
         fab_new_event.setTypeface(FontFaces.montserratBold(this));
         // Create the adapter that will return a fragment for each section
         mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
-            private final Fragment[] mFragments = new Fragment[] {
+            private final Fragment[] mFragments = new Fragment[]{
                     new MyEventsFragment(),
                     new AllEventsFragment()
             };
-            private final String[] mFragmentNames = new String[] {
+            private final String[] mFragmentNames = new String[]{
                     getString(R.string.heading_my_events),
                     getString(R.string.heading_invites)
 
             };
+
             @Override
             public Fragment getItem(int position) {
                 return mFragments[position];
             }
+
             @Override
             public int getCount() {
                 return mFragments.length;
             }
+
             @Override
             public CharSequence getPageTitle(int position) {
                 return mFragmentNames[position];
@@ -92,7 +94,7 @@ public class  MainActivity extends BaseActivity {
         });
 
         // Button launches NewEventActivity
-        findViewById(R.id.fab_button).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.fab_create_event_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, NewEventActivity.class));
@@ -100,7 +102,24 @@ public class  MainActivity extends BaseActivity {
                 finish();
             }
         });
-
+        // Button launches NewEventActivity
+        findViewById(R.id.fab_periodic_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, PeriodicSMSActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
+        // Button launches NewEventActivity
+        findViewById(R.id.fab_periodic_video_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, PeriodicVideoSMSActivity.class));
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+            }
+        });
     }
 
     @Override

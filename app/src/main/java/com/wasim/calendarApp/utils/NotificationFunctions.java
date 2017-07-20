@@ -38,7 +38,7 @@ public class NotificationFunctions {
     }
 
     public void setNotification(String event_type, String event_start_date, String event_from_time, String title, String key){
-
+        Log.e(TAG, "key:"+key);
         String myDate = event_start_date + " " + event_from_time;
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         timeZone = (shared.getString(Constant.timeZone, ""));
@@ -67,6 +67,7 @@ public class NotificationFunctions {
     }
 
     public void setOneTimeAlarm(long millis, String title, String key) {
+        Log.e(TAG, "key:"+key);
         Intent intent = new Intent(context, TimeAlarm.class);
         intent.putExtra("title", title);
         intent.putExtra("key", key);
