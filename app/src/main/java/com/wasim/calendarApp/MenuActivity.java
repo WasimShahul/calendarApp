@@ -29,8 +29,6 @@ public class MenuActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSION_SETTING = 101;
     String[] permissionsRequired = new String[]{Manifest.permission.SEND_SMS,
             Manifest.permission.READ_CONTACTS};
-    String[] permissionsRequired2 = new String[]{Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private TextView txtPermissions;
     private SharedPreferences permissionStatus;
     private boolean sentToSettings = false;
@@ -71,6 +69,13 @@ public class MenuActivity extends AppCompatActivity {
         } else {
             menu_timely_sms.setVisibility(View.GONE);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            menu_timely_video_sms.setVisibility(View.VISIBLE);
+        } else {
+            menu_timely_video_sms.setVisibility(View.GONE);
+        }
+
         menu_home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

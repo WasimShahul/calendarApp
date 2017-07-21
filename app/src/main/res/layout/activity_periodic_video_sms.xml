@@ -234,6 +234,53 @@
                 android:layout_marginRight="@dimen/ll_border_margin_right"
                 android:background="@color/divider"></LinearLayout>
 
+            <!--File Linear Layout-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="@dimen/activity_title_margin_left"
+                android:layout_marginRight="@dimen/activity_title_margin_right"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/title_filetxtView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_message"
+                    android:textColor="@color/element_heading_color" />
+
+                <EditText
+                    android:id="@+id/field_file_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/time_LL"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@null"
+                    android:hint="Click to add"
+                    android:inputType="textMultiLine"
+                    android:maxLines="10"
+                    android:scrollHorizontally="false"
+                    android:textColor="@color/element_value_color"
+                    android:textColorHint="@color/element_hint_color" />
+
+            </LinearLayout>
+
+            <!--Border Linear Layout-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/border_size"
+                android:layout_marginLeft="@dimen/ll_border_margin_left"
+                android:layout_marginRight="@dimen/ll_border_margin_right"
+                android:background="@color/divider"></LinearLayout>
+
             <!--Add Users Linear Layout-->
             <LinearLayout
                 android:layout_width="match_parent"

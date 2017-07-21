@@ -2,6 +2,7 @@ package com.wasim.calendarApp;
 
 import android.*;
 import android.Manifest;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -59,49 +60,43 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 
+import droidninja.filepicker.FilePickerBuilder;
+import droidninja.filepicker.FilePickerConst;
+
 public class PeriodicVideoSMSActivity extends AppCompatActivity {
 
-    TextView app_name_txtView, title_audiotxtView, activity_title_txtView, from_txtView, start_time_txtView, title_txtView, add_users_txtView, fab_submit_event;
-    EditText field_from_date, field_audio_title, field_from_time, field_title;
+    TextView app_name_txtView, title_filetxtView, title_audiotxtView, activity_title_txtView, from_txtView, start_time_txtView, title_txtView, add_users_txtView, fab_submit_event;
+    EditText field_from_date, field_file_title, field_audio_title, field_from_time, field_title;
     MultiAutoCompleteTextView field_users;
     LinearLayout create_ll;
     HashMap<String, String> contactList;
     private static final int READ_CONTACTS_PERMISSIONS_REQUEST = 1;
     private static final int SEND_SMS_PERMISSIONS_REQUEST = 1;
-    private ArrayList<String> contactNames;
     private int year, month, day;
     private int hour, min;
     private static String TAG = "PeriodicVideoSMSActivity";
     private ArrayList<String> selectedPhoneNos;
     NotificationFunctions notificationFunctions;
-    private static final int REQUEST_RECORD_AUDIO = 0;
-    private static String AUDIO_FILE_PATH =
-            Environment.getExternalStorageDirectory().getPath();
     private static final int PERMISSION_CALLBACK_CONSTANT = 100;
     private static final int REQUEST_PERMISSION_SETTING = 101;
     String[] permissionsRequired = new String[]{Manifest.permission.CAMERA,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    private TextView txtPermissions;
     private SharedPreferences permissionStatus;
     private boolean sentToSettings = false;
-    private StorageReference mStorageRef;
     Random r;
-    private static String recordedAudioUrl = "";
-    private static boolean isAudioRecorded = false;
-    private static String filePathName = "";
+    private static String recordedVideoUrl = "";
     private final static int CAMERA_RQ = 6969;
+    ArrayList<String> filePaths, docPaths;
+    private static String selectedFeature = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_periodic_video_sms);
 
-        r = new Random();
-        int i1 = r.nextInt(80 - 65) + 65;
-        filePathName = i1 + "recorded_audio.wav";
-        AUDIO_FILE_PATH = AUDIO_FILE_PATH + "/" + filePathName;
         permissionStatus = getSharedPreferences("permissionStatus", MODE_PRIVATE);
-
+        filePaths = new ArrayList<>();
+        docPaths = new ArrayList<>();
         contactList = new HashMap<>();
         selectedPhoneNos = new ArrayList<>();
 
@@ -111,11 +106,13 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
         activity_title_txtView = (TextView) findViewById(R.id.activity_title_txtView);
         from_txtView = (TextView) findViewById(R.id.from_txtView);
         start_time_txtView = (TextView) findViewById(R.id.start_time_txtView);
+        title_filetxtView = (TextView) findViewById(R.id.title_filetxtView);
         title_txtView = (TextView) findViewById(R.id.title_txtView);
         add_users_txtView = (TextView) findViewById(R.id.add_users_txtView);
         fab_submit_event = (TextView) findViewById(R.id.fab_submit_event);
         title_audiotxtView = (TextView) findViewById(R.id.title_audiotxtView);
         field_from_date = (EditText) findViewById(R.id.field_from_date);
+        field_file_title = (EditText) findViewById(R.id.field_file_title);
         field_from_time = (EditText) findViewById(R.id.field_from_time);
         field_audio_title = (EditText) findViewById(R.id.field_audio_title);
         field_title = (EditText) findViewById(R.id.field_title);
@@ -128,10 +125,12 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
         from_txtView.setTypeface(FontFaces.montserratRegular(this));
         start_time_txtView.setTypeface(FontFaces.montserratRegular(this));
         title_audiotxtView.setTypeface(FontFaces.montserratRegular(this));
+        title_filetxtView.setTypeface(FontFaces.montserratRegular(this));
         add_users_txtView.setTypeface(FontFaces.montserratRegular(this));
         field_from_date.setTypeface(FontFaces.montserratRegular(this));
         field_from_time.setTypeface(FontFaces.montserratRegular(this));
         field_audio_title.setTypeface(FontFaces.montserratRegular(this));
+        field_file_title.setTypeface(FontFaces.montserratRegular(this));
         field_users.setTypeface(FontFaces.montserratRegular(this));
         field_title.setTypeface(FontFaces.montserratRegular(this));
         title_txtView.setTypeface(FontFaces.montserratRegular(this));
@@ -185,6 +184,7 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
         field_from_time.setFocusable(false);
         field_from_date.setFocusable(false);
         field_audio_title.setFocusable(false);
+        field_file_title.setFocusable(false);
 
         field_from_date.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -203,11 +203,89 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
         field_audio_title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                selectedFeature = "Video";
                 requestAudioRecordPermission();
+            }
+        });
+        field_file_title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectedFeature = "Attach";
+                if (ActivityCompat.checkSelfPermission(PeriodicVideoSMSActivity.this, permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(PeriodicVideoSMSActivity.this, permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(PeriodicVideoSMSActivity.this, permissionsRequired[0])
+                            || ActivityCompat.shouldShowRequestPermissionRationale(PeriodicVideoSMSActivity.this, permissionsRequired[1])) {
+                        //Show Information about why you need the permission
+                        AlertDialog.Builder builder = new AlertDialog.Builder(PeriodicVideoSMSActivity.this);
+                        builder.setTitle("Need Multiple Permissions");
+                        builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                ActivityCompat.requestPermissions(PeriodicVideoSMSActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
+                        //Previously Permission Request was cancelled with 'Dont Ask Again',
+                        // Redirect to Settings after showing Information about why you need the permission
+                        AlertDialog.Builder builder = new AlertDialog.Builder(PeriodicVideoSMSActivity.this);
+                        builder.setTitle("Need Multiple Permissions");
+                        builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                sentToSettings = true;
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                                Toast.makeText(getBaseContext(), "Go to Permissions to Grant  SMS and calendar permission", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    } else {
+                        //just request the permission
+                        ActivityCompat.requestPermissions(PeriodicVideoSMSActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+
+                    SharedPreferences.Editor editor = permissionStatus.edit();
+                    editor.putBoolean(permissionsRequired[0], true);
+                    editor.commit();
+                } else {
+                    //You already have the permission, just go ahead.
+                    uploadAttachedFile();
+                }
+
 
             }
         });
 
+    }
+
+    private void uploadAttachedFile() {
+        FilePickerBuilder.getInstance().setMaxCount(1)
+                .setSelectedFiles(filePaths)
+                .enableVideoPicker(true)
+                .enableCameraSupport(false)
+                .showGifs(true)
+                .enableDocSupport(true)
+                .setActivityTheme(R.style.AppTheme)
+                .pickPhoto(PeriodicVideoSMSActivity.this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -220,10 +298,10 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
                 getPermissionToSMS();
             } else {
                 String message = "Sent from calendarApp";
-                if (recordedAudioUrl.equals("")) {
+                if (recordedVideoUrl.equals("")) {
                     message = field_title.getText().toString();
                 } else {
-                    message = field_title.getText().toString() + "\n" + "View this video message\n" + recordedAudioUrl + "\n\n-" + FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                    message = field_title.getText().toString() + "\n" + "View this video message\n" + recordedVideoUrl + "\n\n-" + FirebaseAuth.getInstance().getCurrentUser().getEmail();
                 }
                 if (field_audio_title.getText().toString().equals("Uploading...Please Wait...")) {
                     Toast.makeText(getBaseContext(), "Video record uploading please wait...", Toast.LENGTH_LONG).show();
@@ -261,21 +339,24 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
 
     public void getAllContacts() {
         Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        contactNames = new ArrayList<String>();
+        ArrayList<String> contactNames = new ArrayList<>();
         contactNames.clear();
-        while (phones.moveToNext()) {
-            String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-            String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            contactList.put(name, phoneNumber);
-            contactNames.add(name + " :: " + phoneNumber);
+        if (phones != null) {
+            while (phones.moveToNext()) {
+                String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                contactList.put(name, phoneNumber);
+                contactNames.add(name + " :: " + phoneNumber);
+            }
         }
 
-
-        ArrayAdapter<String> emailIds = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contactNames);
+        ArrayAdapter<String> emailIds = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, contactNames);
         field_users.setAdapter(emailIds);
         field_users.setThreshold(3);
         field_users.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
-        phones.close();
+        if (phones != null) {
+            phones.close();
+        }
     }
 
     private DatePickerDialog.OnDateSetListener myStartDateListener = new
@@ -308,8 +389,8 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
                 .autoSubmit(false)                                 // Whether or not user is allowed to playback videos after recording. This can affect other things, discussed in the next section.
                 .saveDir(saveFolder)                               // The folder recorded videos are saved to
                 .primaryColorAttr(R.attr.colorPrimary)             // The theme color used for the camera, defaults to colorPrimary of Activity in the constructor
-                .showPortraitWarning(true)                         // Whether or not a warning is displayed if the user presses record in portrait orientation
-                .defaultToFrontFacing(false)                         // Allows the user to change cameras.
+                .showPortraitWarning(false)                         // Whether or not a warning is displayed if the user presses record in portrait orientation
+                .defaultToFrontFacing(true)                         // Allows the user to change cameras.
                 .retryExits(false)                                 // If true, the 'Retry' button in the playback screen will exit the camera instead of going back to the recorder
                 .restartTimerOnRetry(false)                        // If true, the countdown timer is reset to 0 when the user taps 'Retry' in playback
                 .continueTimerInPlayback(false)                    // If true, the countdown timer will continue to go down during playback, rather than pausing.
@@ -404,17 +485,6 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Read SMS permission denied", Toast.LENGTH_SHORT).show();
             }
-
-        } else if (requestCode == SEND_SMS_PERMISSIONS_REQUEST) {
-            if (grantResults.length == 1 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Send SMS permission granted", Toast.LENGTH_SHORT).show();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    submit();
-                }
-            } else {
-                Toast.makeText(this, "Send SMS permission denied", Toast.LENGTH_SHORT).show();
-            }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -462,15 +532,13 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
 
     @Override
     protected Dialog onCreateDialog(int id) {
-        // TODO Auto-generated method stub
         if (id == 999) {
             return new DatePickerDialog(this,
                     myStartDateListener, year, month, day);
         }
-        boolean is24HourFormat = true;
         if (id == 1) {
             return new TimePickerDialog(this,
-                    myFromTimeListener, hour, min, is24HourFormat);
+                    myFromTimeListener, hour, min, true);
         }
         return null;
     }
@@ -485,7 +553,7 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 field_audio_title.setText("Uploading...Please Wait...");
                 Toast.makeText(PeriodicVideoSMSActivity.this, "Uploading...", Toast.LENGTH_LONG).show();
-                mStorageRef = FirebaseStorage.getInstance().getReference();
+                StorageReference mStorageRef = FirebaseStorage.getInstance().getReference();
                 Uri file = data.getData();
                 StorageReference riversRef = mStorageRef.child("video/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/" + file.getLastPathSegment());
 
@@ -496,7 +564,7 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
                                 // Get a URL to the uploaded content
                                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
                                 field_audio_title.setText("Upload successful");
-                                recordedAudioUrl = downloadUrl + "";
+                                recordedVideoUrl = downloadUrl + "";
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -520,6 +588,14 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
             if (ActivityCompat.checkSelfPermission(PeriodicVideoSMSActivity.this, permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
                 //Got Permission
                 recordAudio();
+            }
+        }
+
+        if (requestCode == FilePickerConst.REQUEST_CODE_DOC) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                docPaths = new ArrayList<>();
+                docPaths.addAll(data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_DOCS));
+                Log.e(TAG, docPaths.toString());
             }
         }
     }
@@ -630,10 +706,6 @@ public class PeriodicVideoSMSActivity extends AppCompatActivity {
             childUpdates.put("/user-events/" + userId + "/" + key, eventValues);
 
             FirebaseDatabase.getInstance().getReference().updateChildren(childUpdates);
-
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            }
 
         } catch (Exception e) {
 

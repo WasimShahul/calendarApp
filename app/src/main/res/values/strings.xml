@@ -39,6 +39,7 @@
     <string name="message">MESSAGE</string>
     <string name="audio_message">AUDIO MESSAGE</string>
     <string name="video_message">VIDEO MESSAGE</string>
+    <string name="file_message">ATTACH FILE</string>
     <string name="record">RECORD</string>
     <string name="event">EVENT</string>
     <string name="welcome">WELCOME</string>

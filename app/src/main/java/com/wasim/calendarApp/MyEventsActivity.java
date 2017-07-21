@@ -1,12 +1,21 @@
 package com.wasim.calendarApp;
 
+import android.*;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,6 +27,7 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,7 +66,13 @@ public class MyEventsActivity extends AppCompatActivity {
     SharedPreferences shared;
     String timeZone;
 
-
+    private static final int PERMISSION_CALLBACK_CONSTANT = 100;
+    private static final int REQUEST_PERMISSION_SETTING = 101;
+    String[] permissionsRequired = new String[]{android.Manifest.permission.SEND_SMS,
+            android.Manifest.permission.READ_CONTACTS};
+    private SharedPreferences permissionStatus;
+    private boolean sentToSettings = false;
+    private static String menuSelected = "";
     private String TAG = "MyEventsActivity";
 
     @Override
@@ -64,6 +80,7 @@ public class MyEventsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_events);
 
+        permissionStatus = getSharedPreferences("permissionStatus", MODE_PRIVATE);
         shared = getSharedPreferences(Constant.PREFERENCES, MODE_PRIVATE);
         timeZone = (shared.getString(Constant.timeZone, ""));
 
@@ -114,7 +131,13 @@ public class MyEventsActivity extends AppCompatActivity {
                 finish();
             }
         });
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            findViewById(R.id.fab_periodic_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.fab_periodic_video_button).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.fab_periodic_button).setVisibility(View.GONE);
+            findViewById(R.id.fab_periodic_video_button).setVisibility(View.GONE);
+        }
         // Button launches NewEventActivity
         findViewById(R.id.fab_create_event_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,18 +151,132 @@ public class MyEventsActivity extends AppCompatActivity {
         findViewById(R.id.fab_periodic_video_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MyEventsActivity.this, PeriodicVideoSMSActivity.class));
-                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
-                finish();
+                menuSelected = "TimelyVideoSMS";
+                if (ActivityCompat.checkSelfPermission(MyEventsActivity.this, permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(MyEventsActivity.this, permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[0])
+                            || ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[1])) {
+                        //Show Information about why you need the permission
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MyEventsActivity.this);
+                        builder.setTitle("Need Multiple Permissions");
+                        builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                ActivityCompat.requestPermissions(MyEventsActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
+                        //Previously Permission Request was cancelled with 'Dont Ask Again',
+                        // Redirect to Settings after showing Information about why you need the permission
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MyEventsActivity.this);
+                        builder.setTitle("Need Multiple Permissions");
+                        builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                sentToSettings = true;
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                                Toast.makeText(getBaseContext(), "Go to Permissions to Grant  SMS and calendar permission", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    } else {
+                        //just request the permission
+                        ActivityCompat.requestPermissions(MyEventsActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+
+                    SharedPreferences.Editor editor = permissionStatus.edit();
+                    editor.putBoolean(permissionsRequired[0], true);
+                    editor.commit();
+                } else {
+                    //You already have the permission, just go ahead.
+                    proceedAfterPermission();
+                }
             }
         });
         // Button launches NewEventActivity
         findViewById(R.id.fab_periodic_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MyEventsActivity.this, PeriodicSMSActivity.class));
-                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
-                finish();
+                menuSelected = "TimelySMS";
+                if (ActivityCompat.checkSelfPermission(MyEventsActivity.this, permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(MyEventsActivity.this, permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[0])
+                            || ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[1])) {
+                        //Show Information about why you need the permission
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MyEventsActivity.this);
+                        builder.setTitle("Need Multiple Permissions");
+                        builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                ActivityCompat.requestPermissions(MyEventsActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
+                        //Previously Permission Request was cancelled with 'Dont Ask Again',
+                        // Redirect to Settings after showing Information about why you need the permission
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MyEventsActivity.this);
+                        builder.setTitle("Need Multiple Permissions");
+                        builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                        builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                sentToSettings = true;
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                                Toast.makeText(getBaseContext(), "Go to Permissions to Grant  SMS and calendar permission", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
+                    } else {
+                        //just request the permission
+                        ActivityCompat.requestPermissions(MyEventsActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+
+                    SharedPreferences.Editor editor = permissionStatus.edit();
+                    editor.putBoolean(permissionsRequired[0], true);
+                    editor.commit();
+                } else {
+                    //You already have the permission, just go ahead.
+                    proceedAfterPermission();
+                }
             }
         });
 
@@ -164,17 +301,6 @@ public class MyEventsActivity extends AppCompatActivity {
             }
         });
 
-//        fab_button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(MyEventsActivity.this, NewEventActivity.class);
-//                startActivity(intent);
-//                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
-//                finish();
-//            }
-//        });
-
-
     }
 
     private void updateLabel() {
@@ -184,6 +310,19 @@ public class MyEventsActivity extends AppCompatActivity {
 
 //        activity_title_txtView.setText(sdf.format(myCalendar.getTime()));
         setEvents(sdf.format(myCalendar.getTime()));
+    }
+
+    private void proceedAfterPermission() {
+        if (menuSelected.equals("TimelySMS")) {
+            startActivity(new Intent(MyEventsActivity.this, PeriodicSMSActivity.class));
+            overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
+            finish();
+        } else if (menuSelected.equals("TimelyVideoSMS")) {
+            startActivity(new Intent(MyEventsActivity.this, PeriodicVideoSMSActivity.class));
+            overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_down);
+            finish();
+        }
+
     }
 
     private void setEvents(final String dateTime) {
@@ -271,6 +410,71 @@ public class MyEventsActivity extends AppCompatActivity {
         final String formattedDate = df.format(c.getTime());
 
         setEvents(formattedDate);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_CALLBACK_CONSTANT) {
+            //check if all permissions are granted
+            boolean allgranted = false;
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    allgranted = true;
+                } else {
+                    allgranted = false;
+                    break;
+                }
+            }
+
+            if (allgranted) {
+                proceedAfterPermission();
+            } else if (ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[0])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[1])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(MyEventsActivity.this, permissionsRequired[2])) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MyEventsActivity.this);
+                builder.setTitle("Need Multiple Permissions");
+                builder.setMessage("This feature needs READ_CONTACTS and SEND_SMS permissions.");
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        ActivityCompat.requestPermissions(MyEventsActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            } else {
+                Toast.makeText(getBaseContext(), "Unable to get Permission", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PERMISSION_SETTING) {
+            if (ActivityCompat.checkSelfPermission(MyEventsActivity.this, permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
+                //Got Permission
+                proceedAfterPermission();
+            }
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        if (sentToSettings) {
+            if (ActivityCompat.checkSelfPermission(MyEventsActivity.this, permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
+                //Got Permission
+                proceedAfterPermission();
+            }
+        }
     }
 
 }

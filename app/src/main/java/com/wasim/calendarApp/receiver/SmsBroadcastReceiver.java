@@ -15,7 +15,6 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
     public static final String SMS_BUNDLE = "pdus";
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void onReceive(Context context, Intent intent) {
         Bundle intentExtras = intent.getExtras();
 
@@ -24,7 +23,10 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             String smsMessageStr = "";
             for (int i = 0; i < sms.length; ++i) {
                 String format = intentExtras.getString("format");
-                SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) sms[i], format);
+                SmsMessage smsMessage = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    smsMessage = SmsMessage.createFromPdu((byte[]) sms[i], format);
+                }
 
                 String smsBody = smsMessage.getMessageBody().toString();
                 String address = smsMessage.getOriginatingAddress();
@@ -33,8 +35,6 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                 smsMessageStr += smsBody + "\n";
             }
 
-//            NewEventActivity inst = NewEventActivity.instance();
-//            inst.updateInbox(smsMessageStr);
         }
     }
 }
