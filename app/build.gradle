@@ -41,6 +41,8 @@ dependencies {
     compile 'com.google.firebase:firebase-storage:11.0.1'
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.droidninja:filepicker:2.0.6'
+    compile 'com.google.firebase:firebase-messaging:11.0.1'
+    compile 'com.firebase:firebase-jobdispatcher:0.5.2'
     testCompile 'junit:junit:4.12'
 }
 

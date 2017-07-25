@@ -46,6 +46,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "398699211518-g3qj8k7vjcq2vn3q40oc33j0snj3tumv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wasim.calendarApp",
+            "certificate_hash": "5a4d98ca47866b588b9569bdc6ae0c0aa18e260e"
+          }
+        },
+        {
           "client_id": "398699211518-1tjufsbdlup0ej29ml9ed1tjrb0ei29q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
